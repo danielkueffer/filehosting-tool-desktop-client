@@ -28,9 +28,11 @@ public class UserClientImpl implements UserClient {
 		return null;
 	}
 
+	/**
+	 * Get the server status
+	 */
 	@Override
 	public String checkServerStatus(String url) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }

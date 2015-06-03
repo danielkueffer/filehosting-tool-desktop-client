@@ -48,9 +48,17 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public boolean checkServerStatus(String url) {
+
+		if (!url.startsWith("http://") || !url.startsWith("https://")) {
+			url = "http://" + url;
+		}
+
 		url = url + "/resource/status";
-		this.userClient.checkServerStatus(url);
-		
+
+		String res = this.userClient.checkServerStatus(url);
+
+		System.out.println(res);
+
 		return false;
 	}
 

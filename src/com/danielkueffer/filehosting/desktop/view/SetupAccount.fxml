@@ -18,9 +18,10 @@
             <Separator prefWidth="200.0" />
             <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
               <children>
+                <Button fx:id="backButton" mnemonicParsing="false" onAction="#goToBack" text="&lt; Back" />
                 <Button id="buttonNext" fx:id="nextButton" mnemonicParsing="false" onAction="#goToNext" text="Next &gt;">
                   <HBox.margin>
-                    <Insets right="25.0" />
+                    <Insets left="15.0" right="25.0" />
                   </HBox.margin>
                 </Button>
               </children>

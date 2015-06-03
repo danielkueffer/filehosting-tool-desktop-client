@@ -26,6 +26,9 @@ public class SetupAccountController extends AnchorPane implements Initializable 
 	@FXML
 	private Button nextButton;
 
+	@FXML
+	private Button backButton;
+
 	private ResourceBundle bundle;
 	private Main application;
 
@@ -37,6 +40,7 @@ public class SetupAccountController extends AnchorPane implements Initializable 
 		this.bundle = resources;
 		this.accountTitle.setText(this.bundle.getString("setupUserDataTitle"));
 		this.nextButton.setText(this.bundle.getString("setupNext"));
+		this.backButton.setText(this.bundle.getString("setupBack"));
 	}
 
 	/**
@@ -59,5 +63,18 @@ public class SetupAccountController extends AnchorPane implements Initializable 
 		}
 
 		this.application.goToSetupHomeFolder();
+	}
+
+	/**
+	 * Back button event
+	 * 
+	 * @param evt
+	 */
+	public void goToBack(ActionEvent evt) {
+		if (this.application == null) {
+			return;
+		}
+
+		this.application.goToSetupServer();
 	}
 }

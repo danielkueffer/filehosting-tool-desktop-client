@@ -3,11 +3,14 @@ package com.danielkueffer.filehosting.desktop.controller;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 
 import com.danielkueffer.filehosting.desktop.Main;
@@ -26,7 +29,13 @@ public class SetupServerUrlController extends AnchorPane implements
 	private Label connectTitle;
 
 	@FXML
+	private Label serverAddressLabel;
+
+	@FXML
 	private Button nextButton;
+
+	@FXML
+	private TextField serverAddressField;
 
 	private ResourceBundle bundle;
 	private Main application;
@@ -40,6 +49,10 @@ public class SetupServerUrlController extends AnchorPane implements
 		this.bundle = resources;
 		this.connectTitle.setText(this.bundle.getString("setupConnectTitle"));
 		this.nextButton.setText(this.bundle.getString("setupNext"));
+		this.serverAddressLabel.setText(this.bundle
+				.getString("setupServerAddress"));
+
+		this.serverAddressField.textProperty().addListener(textChange);
 	}
 
 	/**
@@ -69,9 +82,31 @@ public class SetupServerUrlController extends AnchorPane implements
 		if (this.application == null) {
 			return;
 		}
-		
-		this.userService.checkServerStatus("test");
+
+		String serverAddr = this.serverAddressField.getText();
+
+		if (! this.userService.checkServerStatus(serverAddr)) {
+			return;
+		} else {
+			// Save property
+		}
 
 		this.application.goToSetupAccount();
 	}
+
+	/**
+	 * Text input change
+	 */
+	public ChangeListener<String> textChange = new ChangeListener<String>() {
+		@Override
+		public void changed(ObservableValue<? extends String> observable,
+				String oldVal, String newVal) {
+
+			if (!newVal.trim().equals("")) {
+				nextButton.setDisable(false);
+			} else {
+				nextButton.setDisable(true);
+			}
+		}
+	};
 }

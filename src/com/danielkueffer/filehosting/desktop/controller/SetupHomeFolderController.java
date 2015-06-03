@@ -27,6 +27,9 @@ public class SetupHomeFolderController extends AnchorPane implements
 	@FXML
 	private Button connectButton;
 
+	@FXML
+	private Button backButton;
+
 	private ResourceBundle bundle;
 	private Main application;
 
@@ -39,6 +42,7 @@ public class SetupHomeFolderController extends AnchorPane implements
 		this.homeFolderTitle.setText(this.bundle
 				.getString("setupHomeFolderTitle"));
 		this.connectButton.setText(this.bundle.getString("setupConnect"));
+		this.backButton.setText(this.bundle.getString("setupBack"));
 	}
 
 	/**
@@ -61,5 +65,18 @@ public class SetupHomeFolderController extends AnchorPane implements
 		}
 
 		this.application.goToSettings();
+	}
+
+	/**
+	 * Back button event
+	 * 
+	 * @param evt
+	 */
+	public void goToBack(ActionEvent evt) {
+		if (this.application == null) {
+			return;
+		}
+		
+		this.application.goToSetupAccount();
 	}
 }
