@@ -4,7 +4,10 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 
 import com.danielkueffer.filehosting.desktop.Main;
@@ -18,7 +21,24 @@ import com.danielkueffer.filehosting.desktop.Main;
 public class SetupServerUrlController extends AnchorPane implements
 		Initializable {
 
+	@FXML
+	private Label connectTitle;
+
+	@FXML
+	private Button nextButton;
+
+	private ResourceBundle bundle;
 	private Main application;
+
+	/**
+	 * Initialize the controller
+	 */
+	@Override
+	public void initialize(URL location, ResourceBundle resources) {
+		this.bundle = resources;
+		this.connectTitle.setText(this.bundle.getString("setupConnectTitle"));
+		this.nextButton.setText(this.bundle.getString("setupNext"));
+	}
 
 	/**
 	 * Set the application
@@ -40,9 +60,5 @@ public class SetupServerUrlController extends AnchorPane implements
 		}
 
 		this.application.goToSetupAccount();
-	}
-
-	@Override
-	public void initialize(URL location, ResourceBundle resources) {
 	}
 }

@@ -5,8 +5,10 @@ import java.util.ResourceBundle;
 
 import com.danielkueffer.filehosting.desktop.Main;
 
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.control.Label;
 
 /**
  * The network controller
@@ -16,8 +18,21 @@ import javafx.scene.Parent;
  */
 public class NetworkController extends Parent implements Initializable {
 
+	@FXML
+	private Label networkTitle;
+
+	private ResourceBundle bundle;
 	private Main application;
 	private SettingsController settingsController;
+
+	/**
+	 * Initialize the controller
+	 */
+	@Override
+	public void initialize(URL location, ResourceBundle resources) {
+		this.bundle = resources;
+		this.networkTitle.setText(this.bundle.getString("settingsNetwork"));
+	}
 
 	/**
 	 * Set the application
@@ -29,10 +44,4 @@ public class NetworkController extends Parent implements Initializable {
 		this.application = application;
 		this.settingsController = settingsController;
 	}
-
-	@Override
-	public void initialize(URL arg0, ResourceBundle arg1) {
-		// TODO Auto-generated method stub
-	}
-
 }

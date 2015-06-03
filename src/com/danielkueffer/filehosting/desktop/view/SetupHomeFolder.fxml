@@ -18,7 +18,7 @@
             <Separator prefWidth="200.0" />
             <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
               <children>
-                <Button id="buttonNext" mnemonicParsing="false" onAction="#connect" text="Connect...">
+                <Button id="buttonNext" fx:id="connectButton" mnemonicParsing="false" onAction="#connect" text="Connect...">
                   <HBox.margin>
                     <Insets right="25.0" />
                   </HBox.margin>
@@ -43,7 +43,7 @@
           <children>
             <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="200.0">
               <children>
-                <Label prefWidth="241.0" text="Choose your home folder" textFill="#606060">
+                <Label fx:id="homeFolderTitle" prefWidth="343.0" text="Choose your home folder" textFill="#606060">
                   <font>
                     <Font name="System Bold" size="14.0" />
                   </font>

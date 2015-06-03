@@ -13,9 +13,9 @@
   <children>
     <TabPane fx:id="settingsTabPane" prefHeight="500.0" prefWidth="700.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <tabs>
-        <Tab content="$null" text="User Account" />
-        <Tab content="$null" text="Activities" />
-        <Tab content="$null" text="Network" />
+        <Tab fx:id="userAccountTab" content="$null" text="User Account" />
+        <Tab fx:id="activitiesTab" content="$null" text="Activities" />
+        <Tab fx:id="networkTab" content="$null" text="Network" />
       </tabs>
     </TabPane>
   </children>

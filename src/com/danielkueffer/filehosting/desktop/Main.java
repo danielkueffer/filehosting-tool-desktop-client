@@ -1,6 +1,8 @@
 package com.danielkueffer.filehosting.desktop;
 
 import java.io.InputStream;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -46,6 +48,7 @@ public class Main extends Application {
 
 	private Stage primaryStage;
 	private User loggedInUser;
+	private Locale currentLocale;
 
 	/**
 	 * @param args
@@ -63,6 +66,8 @@ public class Main extends Application {
 		this.primaryStage.setTitle(APP_NAME);
 		this.primaryStage.setMinWidth(MINIMUM_WINDOW_WIDTH);
 		this.primaryStage.setMaxHeight(MINIMUM_WINDOW_HEIGHT);
+
+		this.currentLocale = new Locale("de", "DE");
 
 		// Check if the user is logged in
 		if (this.loggedInUser == null) {
@@ -129,6 +134,7 @@ public class Main extends Application {
 			SettingsController settingsController = (SettingsController) this
 					.replaceSceneContent("view/Settings.fxml");
 			settingsController.setApp(this);
+			settingsController.goToUserAccount();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -148,6 +154,9 @@ public class Main extends Application {
 		loader.setBuilderFactory(new JavaFXBuilderFactory());
 		loader.setLocation(this.getClass().getClassLoader()
 				.getResource(PATH + fxml));
+
+		loader.setResources(ResourceBundle.getBundle(PATH
+				+ "resources/i18n/messages", this.currentLocale));
 
 		AnchorPane pane;
 
@@ -184,5 +193,12 @@ public class Main extends Application {
 	 */
 	public User getLoggedInUser() {
 		return loggedInUser;
+	}
+
+	/**
+	 * @return the currentLocale
+	 */
+	public Locale getCurrentLocale() {
+		return currentLocale;
 	}
 }

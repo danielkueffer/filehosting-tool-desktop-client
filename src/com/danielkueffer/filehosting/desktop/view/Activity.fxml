@@ -15,7 +15,7 @@
       <children>
         <HBox prefHeight="15.0" prefWidth="760.0">
           <children>
-            <Label prefWidth="83.0" text="Activities" textFill="#606060">
+            <Label fx:id="activityTitle" prefWidth="83.0" text="Activities" textFill="#606060">
               <font>
                 <Font name="System Bold" size="11.0" />
               </font>

@@ -25,13 +25,39 @@ import com.danielkueffer.filehosting.desktop.Main;
  */
 public class SettingsController extends AnchorPane implements Initializable {
 
-	private static final String USER_ACCOUNT_TAB = "User Account";
-	private static final String ACTIVITY_TAB = "Activities";
-
 	@FXML
 	private TabPane settingsTabPane;
 
+	@FXML
+	private Tab userAccountTab;
+
+	@FXML
+	private Tab activitiesTab;
+
+	@FXML
+	private Tab networkTab;
+
+	private ResourceBundle bundle;
 	private Main application;
+
+	/**
+	 * Initialize the controller
+	 */
+	@Override
+	public void initialize(URL location, ResourceBundle resources) {
+		this.bundle = resources;
+		this.userAccountTab.setText(this.bundle
+				.getString("settingsUserAccount"));
+		this.activitiesTab.setText(this.bundle.getString("settingsActivities"));
+		this.networkTab.setText(this.bundle.getString("settingsNetwork"));
+
+		// Add Tab ChangeListener
+		this.settingsTabPane.getSelectionModel().selectedItemProperty()
+				.addListener(this.tabListener);
+
+		// Select first tab
+		this.settingsTabPane.getSelectionModel().selectFirst();
+	}
 
 	/**
 	 * Set the application
@@ -40,29 +66,6 @@ public class SettingsController extends AnchorPane implements Initializable {
 	 */
 	public void setApp(Main application) {
 		this.application = application;
-
-		// Add Tab ChangeListener
-		this.settingsTabPane.getSelectionModel().selectedItemProperty()
-				.addListener(new ChangeListener<Tab>() {
-					public void changed(
-							ObservableValue<? extends Tab> observable,
-							Tab oldValue, Tab newValue) {
-						if (newValue.getContent() == null) {
-							if (newValue.getText().equals(USER_ACCOUNT_TAB)) {
-								goToUserAccount();
-							} else if (newValue.getText().equals(ACTIVITY_TAB)) {
-								goToActivities();
-							} else {
-								goToNetwork();
-							}
-						} else {
-							newValue.getContent();
-						}
-					}
-				});
-
-		this.settingsTabPane.getSelectionModel().selectFirst();
-		this.goToUserAccount();
 	}
 
 	/**
@@ -123,6 +126,9 @@ public class SettingsController extends AnchorPane implements Initializable {
 		InputStream in = Main.class.getResourceAsStream(fxml);
 		loader.setBuilderFactory(new JavaFXBuilderFactory());
 		loader.setLocation(Main.class.getResource(fxml));
+		loader.setResources(ResourceBundle.getBundle(Main.PATH
+				+ "resources/i18n/messages",
+				this.application.getCurrentLocale()));
 
 		Parent root;
 
@@ -136,7 +142,25 @@ public class SettingsController extends AnchorPane implements Initializable {
 		return (Initializable) loader.getController();
 	}
 
-	@Override
-	public void initialize(URL arg0, ResourceBundle arg1) {
-	}
+	/**
+	 * ChangeListener to change the view of the tab
+	 */
+	private ChangeListener<Tab> tabListener = new ChangeListener<Tab>() {
+		public void changed(ObservableValue<? extends Tab> observable,
+				Tab oldValue, Tab newValue) {
+			if (newValue.getContent() == null) {
+				if (newValue.getText().equals(
+						bundle.getString("settingsUserAccount"))) {
+					goToUserAccount();
+				} else if (newValue.getText().equals(
+						bundle.getString("settingsActivities"))) {
+					goToActivities();
+				} else {
+					goToNetwork();
+				}
+			} else {
+				newValue.getContent();
+			}
+		}
+	};
 }

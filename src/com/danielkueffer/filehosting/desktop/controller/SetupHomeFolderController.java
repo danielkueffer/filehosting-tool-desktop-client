@@ -4,7 +4,10 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 
 import com.danielkueffer.filehosting.desktop.Main;
@@ -18,7 +21,25 @@ import com.danielkueffer.filehosting.desktop.Main;
 public class SetupHomeFolderController extends AnchorPane implements
 		Initializable {
 
+	@FXML
+	private Label homeFolderTitle;
+
+	@FXML
+	private Button connectButton;
+
+	private ResourceBundle bundle;
 	private Main application;
+
+	/**
+	 * Initialize the controller
+	 */
+	@Override
+	public void initialize(URL location, ResourceBundle resources) {
+		this.bundle = resources;
+		this.homeFolderTitle.setText(this.bundle
+				.getString("setupHomeFolderTitle"));
+		this.connectButton.setText(this.bundle.getString("setupConnect"));
+	}
 
 	/**
 	 * Set the application
@@ -27,12 +48,6 @@ public class SetupHomeFolderController extends AnchorPane implements
 	 */
 	public void setApp(Main application) {
 		this.application = application;
-	}
-
-	@Override
-	public void initialize(URL location, ResourceBundle resources) {
-		// TODO Auto-generated method stub
-
 	}
 
 	/**
@@ -44,7 +59,7 @@ public class SetupHomeFolderController extends AnchorPane implements
 		if (this.application == null) {
 			return;
 		}
-		
+
 		this.application.goToSettings();
 	}
 }

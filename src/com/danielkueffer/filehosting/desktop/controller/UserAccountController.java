@@ -6,8 +6,11 @@ import java.util.ResourceBundle;
 import com.danielkueffer.filehosting.desktop.Main;
 
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 
 /**
  * The user account controller
@@ -17,8 +20,27 @@ import javafx.scene.Parent;
  */
 public class UserAccountController extends Parent implements Initializable {
 
+	@FXML
+	private Label userAccountTitle;
+
+	@FXML
+	private Button editAccountButton;
+
+	private ResourceBundle bundle;
 	private Main application;
 	private SettingsController settingsController;
+
+	/**
+	 * Initialize the controller
+	 */
+	@Override
+	public void initialize(URL location, ResourceBundle resources) {
+		this.bundle = resources;
+		this.userAccountTitle.setText(this.bundle
+				.getString("settingsUserAccount"));
+		this.editAccountButton.setText(this.bundle
+				.getString("settingsEditAccount"));
+	}
 
 	/**
 	 * Set the application
@@ -43,10 +65,4 @@ public class UserAccountController extends Parent implements Initializable {
 
 		this.application.goToSetupServer();
 	}
-
-	@Override
-	public void initialize(URL arg0, ResourceBundle arg1) {
-		// TODO Auto-generated method stub
-	}
-
 }
