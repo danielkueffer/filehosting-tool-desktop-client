@@ -11,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 
 import com.danielkueffer.filehosting.desktop.Main;
+import com.danielkueffer.filehosting.desktop.service.UserService;
 
 /**
  * The controller to set the URL of the file hosting server
@@ -29,6 +30,7 @@ public class SetupServerUrlController extends AnchorPane implements
 
 	private ResourceBundle bundle;
 	private Main application;
+	private UserService userService;
 
 	/**
 	 * Initialize the controller
@@ -50,6 +52,15 @@ public class SetupServerUrlController extends AnchorPane implements
 	}
 
 	/**
+	 * Set the user service
+	 * 
+	 * @param userService
+	 */
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
+
+	/**
 	 * Next button event
 	 * 
 	 * @param evt
@@ -58,6 +69,8 @@ public class SetupServerUrlController extends AnchorPane implements
 		if (this.application == null) {
 			return;
 		}
+		
+		this.userService.checkServerStatus("test");
 
 		this.application.goToSetupAccount();
 	}

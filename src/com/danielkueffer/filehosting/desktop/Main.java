@@ -16,7 +16,17 @@ import com.danielkueffer.filehosting.desktop.controller.SettingsController;
 import com.danielkueffer.filehosting.desktop.controller.SetupAccountController;
 import com.danielkueffer.filehosting.desktop.controller.SetupHomeFolderController;
 import com.danielkueffer.filehosting.desktop.controller.SetupServerUrlController;
+import com.danielkueffer.filehosting.desktop.repository.client.FileClient;
+import com.danielkueffer.filehosting.desktop.repository.client.UserClient;
+import com.danielkueffer.filehosting.desktop.repository.client.impl.FileClientImpl;
+import com.danielkueffer.filehosting.desktop.repository.client.impl.UserClientImpl;
 import com.danielkueffer.filehosting.desktop.repository.pojos.User;
+import com.danielkueffer.filehosting.desktop.service.FileService;
+import com.danielkueffer.filehosting.desktop.service.PropertyService;
+import com.danielkueffer.filehosting.desktop.service.UserService;
+import com.danielkueffer.filehosting.desktop.service.impl.FileServiceImpl;
+import com.danielkueffer.filehosting.desktop.service.impl.PropertyServiceImpl;
+import com.danielkueffer.filehosting.desktop.service.impl.UserServiceImpl;
 
 /**
  * Main application
@@ -50,6 +60,12 @@ public class Main extends Application {
 	private User loggedInUser;
 	private Locale currentLocale;
 
+	private UserClient userClient;
+	private FileClient fileClient;
+	private PropertyService propertyService;
+	private UserService userService;
+	private FileService fileService;
+
 	/**
 	 * @param args
 	 */
@@ -62,6 +78,14 @@ public class Main extends Application {
 	 */
 	@Override
 	public void start(Stage primaryStage) {
+		this.userClient = new UserClientImpl();
+		this.fileClient = new FileClientImpl();
+
+		this.propertyService = new PropertyServiceImpl();
+		this.userService = new UserServiceImpl(userClient, propertyService);
+		this.fileService = new FileServiceImpl(fileClient, propertyService,
+				userService);
+
 		this.primaryStage = primaryStage;
 		this.primaryStage.setTitle(APP_NAME);
 		this.primaryStage.setMinWidth(MINIMUM_WINDOW_WIDTH);
@@ -89,6 +113,7 @@ public class Main extends Application {
 			SetupServerUrlController setupServerUrlController = (SetupServerUrlController) this
 					.replaceSceneContent("view/SetupServerUrl.fxml");
 			setupServerUrlController.setApp(this);
+			setupServerUrlController.setUserService(this.userService);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
