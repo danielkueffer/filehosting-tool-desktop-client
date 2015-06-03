@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane id="rootPane" prefHeight="500.0" prefWidth="700.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="com.danielkueffer.filehosting.desktop.controller.SettingsController">
+  <children>
+    <TabPane fx:id="settingsTabPane" prefHeight="500.0" prefWidth="700.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <tabs>
+        <Tab content="$null" text="User Account" />
+        <Tab content="$null" text="Activities" />
+        <Tab content="$null" text="Network" />
+      </tabs>
+    </TabPane>
+  </children>
+  <stylesheets>
+    <URL value="@application.css" />
+  </stylesheets>
+</AnchorPane>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane id="rootPane" prefHeight="400.0" prefWidth="700.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="com.danielkueffer.filehosting.desktop.controller.SetupAccountController">
+  <children>
+    <BorderPane prefHeight="400.0" prefWidth="700.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <bottom>
+        <VBox prefHeight="60.0" prefWidth="100.0">
+          <children>
+            <Separator prefWidth="200.0" />
+            <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
+              <children>
+                <Button id="buttonNext" mnemonicParsing="false" onAction="#goToNext" text="Next &gt;">
+                  <HBox.margin>
+                    <Insets right="25.0" />
+                  </HBox.margin>
+                </Button>
+              </children>
+            </HBox>
+          </children>
+        </VBox>
+      </bottom>
+      <center>
+        <VBox depthTest="INHERIT" mouseTransparent="false" prefHeight="200.0" prefWidth="100.0">
+          <children>
+            <Label text="Content" />
+          </children>
+          <padding>
+            <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+          </padding>
+        </VBox>
+      </center>
+      <top>
+        <VBox prefHeight="-1.0" prefWidth="800.0">
+          <children>
+            <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="200.0">
+              <children>
+                <Label prefWidth="241.0" text="Add your user data" textFill="#606060">
+                  <font>
+                    <Font name="System Bold" size="14.0" />
+                  </font>
+                  <HBox.margin>
+                    <Insets left="25.0" />
+                  </HBox.margin>
+                </Label>
+              </children>
+            </HBox>
+            <Separator orientation="HORIZONTAL" prefWidth="200.0" visible="true" />
+          </children>
+        </VBox>
+      </top>
+    </BorderPane>
+  </children>
+  <padding>
+    <Insets />
+  </padding>
+  <stylesheets>
+    <URL value="@application.css" />
+  </stylesheets>
+</AnchorPane>

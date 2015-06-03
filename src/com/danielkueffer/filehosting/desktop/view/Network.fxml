@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane id="rootPane" prefHeight="500.0" prefWidth="570.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="com.danielkueffer.filehosting.desktop.controller.NetworkController">
+  <children>
+    <VBox prefHeight="-1.0" prefWidth="800.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="24.0">
+      <children>
+        <HBox prefHeight="15.0" prefWidth="760.0">
+          <children>
+            <Label prefWidth="83.0" text="Network" textFill="#606060">
+              <font>
+                <Font name="System Bold" size="11.0" />
+              </font>
+            </Label>
+          </children>
+          <padding>
+            <Insets bottom="10.0" top="5.0" />
+          </padding>
+        </HBox>
+        <Separator prefWidth="200.0" />
+      </children>
+    </VBox>
+  </children>
+  <padding>
+    <Insets />
+  </padding>
+  <stylesheets>
+    <URL value="@application.css" />
+  </stylesheets>
+</AnchorPane>
