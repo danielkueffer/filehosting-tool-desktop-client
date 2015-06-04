@@ -7,6 +7,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
 <AnchorPane id="rootPane" prefHeight="400.0" prefWidth="700.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="com.danielkueffer.filehosting.desktop.controller.SetupAccountController">
@@ -19,7 +20,7 @@
             <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
               <children>
                 <Button fx:id="backButton" mnemonicParsing="false" onAction="#goToBack" text="&lt; Back" />
-                <Button id="buttonNext" fx:id="nextButton" mnemonicParsing="false" onAction="#goToNext" text="Next &gt;">
+                <Button id="buttonNext" fx:id="nextButton" disable="true" mnemonicParsing="false" onAction="#goToNext" text="Next &gt;">
                   <HBox.margin>
                     <Insets left="15.0" right="25.0" />
                   </HBox.margin>
@@ -32,7 +33,29 @@
       <center>
         <VBox depthTest="INHERIT" mouseTransparent="false" prefHeight="200.0" prefWidth="100.0">
           <children>
-            <Label text="Content" />
+            <GridPane>
+              <children>
+                <Label fx:id="usernameLabel" prefHeight="18.999908447265625" text="Username:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <TextField fx:id="usernameField" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <Label id="serverAddressErrorLabel" disable="false" prefWidth="514.0" text="Address Error" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                  <textFill>
+                    <Color blue="0.000" green="0.000" red="0.800" fx:id="x1" />
+                  </textFill>
+                </Label>
+                <Label fx:id="passwordLabel" prefWidth="111.0" text="Password:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <PasswordField fx:id="passwordField" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label fx:id="userAccountErrorLabel" prefWidth="514.0" text="Error" textFill="$x1" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+              </children>
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="325.0" minWidth="10.0" prefWidth="122.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="528.0" minWidth="10.0" prefWidth="528.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+            </GridPane>
           </children>
           <padding>
             <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />

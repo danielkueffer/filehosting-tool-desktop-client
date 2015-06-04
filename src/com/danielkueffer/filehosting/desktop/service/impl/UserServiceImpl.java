@@ -8,6 +8,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.stream.JsonParsingException;
 
+import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
 import com.danielkueffer.filehosting.desktop.repository.client.UserClient;
 import com.danielkueffer.filehosting.desktop.repository.pojos.User;
 import com.danielkueffer.filehosting.desktop.service.PropertyService;
@@ -19,8 +20,10 @@ import com.danielkueffer.filehosting.desktop.service.UserService;
  * @author dkueffer
  * 
  */
-@SuppressWarnings("unused")
 public class UserServiceImpl implements UserService {
+
+	private static final String STATUS_URL = "resource/status";
+	private static final String LOGIN_URL = "resource/user/login";
 
 	private UserClient userClient;
 	private PropertyService propertyService;
@@ -31,10 +34,17 @@ public class UserServiceImpl implements UserService {
 		this.propertyService = propertyService;
 	}
 
+	/**
+	 * Login
+	 */
 	@Override
 	public boolean login(String username, String password) {
-		// TODO Auto-generated method stub
-		return false;
+		String serverUrl = this.propertyService
+				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue());
+
+		String loginUrl = serverUrl + LOGIN_URL;
+
+		return this.userClient.login(loginUrl, username, password);
 	}
 
 	@Override
@@ -57,9 +67,9 @@ public class UserServiceImpl implements UserService {
 
 		// Add the status path to the URL
 		if (url.endsWith("/")) {
-			url = url + "resource/status";
+			url = url + STATUS_URL;
 		} else {
-			url = url + "/resource/status";
+			url = url + "/" + STATUS_URL;
 		}
 
 		// Get the JSON string from the server

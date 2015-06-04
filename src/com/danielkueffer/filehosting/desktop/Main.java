@@ -92,6 +92,7 @@ public class Main extends Application {
 		this.primaryStage.setMaxHeight(MINIMUM_WINDOW_HEIGHT);
 
 		this.currentLocale = new Locale("de", "DE");
+		// this.currentLocale = new Locale("en", "EN");
 
 		// Check if the user is logged in
 		if (this.loggedInUser == null) {
@@ -112,8 +113,10 @@ public class Main extends Application {
 
 			SetupServerUrlController setupServerUrlController = (SetupServerUrlController) this
 					.replaceSceneContent("view/SetupServerUrl.fxml");
+
 			setupServerUrlController.setApp(this);
 			setupServerUrlController.setUserService(this.userService);
+			setupServerUrlController.setPropertyService(this.propertyService);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -128,7 +131,10 @@ public class Main extends Application {
 
 			SetupAccountController setupAccountControler = (SetupAccountController) this
 					.replaceSceneContent("view/SetupAccount.fxml");
+
 			setupAccountControler.setApp(this);
+			setupAccountControler.setUserService(this.userService);
+			setupAccountControler.setPropertyService(this.propertyService);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -218,6 +224,15 @@ public class Main extends Application {
 	 */
 	public User getLoggedInUser() {
 		return loggedInUser;
+	}
+
+	/**
+	 * The loggedInUser to set
+	 * 
+	 * @param user
+	 */
+	public void setLoggedInUser(User user) {
+		this.loggedInUser = user;
 	}
 
 	/**

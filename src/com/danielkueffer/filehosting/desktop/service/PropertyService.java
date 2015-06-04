@@ -7,7 +7,7 @@ package com.danielkueffer.filehosting.desktop.service;
  * 
  */
 public interface PropertyService {
-	String getProperty();
+	String getProperty(String key);
 
-	void saveProperty(String property);
+	void saveProperty(String key, String value);
 }

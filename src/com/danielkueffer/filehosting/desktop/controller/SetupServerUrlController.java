@@ -14,6 +14,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 
 import com.danielkueffer.filehosting.desktop.Main;
+import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
+import com.danielkueffer.filehosting.desktop.service.PropertyService;
 import com.danielkueffer.filehosting.desktop.service.UserService;
 
 /**
@@ -43,6 +45,7 @@ public class SetupServerUrlController extends AnchorPane implements
 	private ResourceBundle bundle;
 	private Main application;
 	private UserService userService;
+	private PropertyService propertyService;
 
 	/**
 	 * Initialize the controller
@@ -77,6 +80,23 @@ public class SetupServerUrlController extends AnchorPane implements
 	}
 
 	/**
+	 * Set the property service
+	 * 
+	 * @param propertyService
+	 */
+	public void setPropertyService(PropertyService propertyService) {
+		this.propertyService = propertyService;
+
+		String serverAddress = this.propertyService
+				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue());
+
+		if (serverAddress != null) {
+			this.serverAddressField.setText(serverAddress);
+			this.nextButton.requestFocus();
+		}
+	}
+
+	/**
 	 * Next button event
 	 * 
 	 * @param evt
@@ -96,15 +116,22 @@ public class SetupServerUrlController extends AnchorPane implements
 
 		// Check if the server URL is correct
 		if (!this.userService.checkServerStatus(url)) {
-			
+
 			this.serverAddressErrorLabel.setText(this.bundle
-					.getString("setupServerAddressError") + url);
+					.getString("setupServerAddressError") + " " + url);
 
 			this.serverAddressErrorLabel.setVisible(true);
 
 			return;
 		} else {
 			this.serverAddressErrorLabel.setVisible(false);
+
+			if (!url.endsWith("/")) {
+				url = url + "/";
+			}
+
+			this.propertyService.saveProperty(
+					PropertiesKeys.SERVER_ADDRESS.getValue(), url);
 		}
 
 		this.application.goToSetupAccount();
