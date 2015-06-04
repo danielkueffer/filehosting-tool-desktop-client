@@ -28,6 +28,8 @@ public class UserServiceImpl implements UserService {
 	private UserClient userClient;
 	private PropertyService propertyService;
 
+	private String authToken;
+
 	public UserServiceImpl(UserClient userClient,
 			PropertyService propertyService) {
 		this.userClient = userClient;
@@ -44,7 +46,18 @@ public class UserServiceImpl implements UserService {
 
 		String loginUrl = serverUrl + LOGIN_URL;
 
-		return this.userClient.login(loginUrl, username, password);
+		String res = this.userClient.login(loginUrl, username, password);
+
+		JsonReader reader = Json.createReader(new StringReader(res));
+
+		JsonObject jObj = reader.readObject();
+
+		if (jObj.containsKey("auth_token")) {
+			this.authToken = jObj.getString("auth_token");
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override
@@ -92,4 +105,10 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
+	/**
+	 * @return the authToken
+	 */
+	public String getAuthToken() {
+		return authToken;
+	}
 }

@@ -7,11 +7,11 @@ package com.danielkueffer.filehosting.desktop.repository.client;
  * 
  */
 public interface UserClient {
-	boolean login(String url, String username, String password);
+	String login(String url, String username, String password);
 	
-	boolean logout();
+	boolean logout(String authToken);
 	
-	String getUserByUsername(String username);
+	String getUserByUsername(String username, String authToken);
 	
 	String checkServerStatus(String url);
 }

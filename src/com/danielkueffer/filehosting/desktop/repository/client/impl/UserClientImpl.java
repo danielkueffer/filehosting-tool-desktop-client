@@ -1,10 +1,5 @@
 package com.danielkueffer.filehosting.desktop.repository.client.impl;
 
-import java.io.StringReader;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -23,13 +18,11 @@ import com.danielkueffer.filehosting.desktop.repository.client.UserClient;
  */
 public class UserClientImpl implements UserClient {
 
-	private String authToken;
-
 	/**
 	 * Login to the REST resource and get the authToken
 	 */
 	@Override
-	public boolean login(String url, String username, String password) {
+	public String login(String url, String username, String password) {
 		Client client = ClientBuilder.newClient();
 
 		Form form = new Form();
@@ -42,27 +35,17 @@ public class UserClientImpl implements UserClient {
 				.post(Entity.entity(form,
 						MediaType.APPLICATION_FORM_URLENCODED_TYPE));
 
-		JsonReader reader = Json.createReader(new StringReader(res
-				.readEntity(String.class)));
-
-		JsonObject jObj = reader.readObject();
-
-		if (jObj.containsKey("auth_token")) {
-			this.authToken = jObj.getString("auth_token");
-			return true;
-		}
-
-		return false;
+		return res.readEntity(String.class);
 	}
 
 	@Override
-	public boolean logout() {
+	public boolean logout(String authToken) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public String getUserByUsername(String username) {
+	public String getUserByUsername(String username, String authToken) {
 		// TODO Auto-generated method stub
 		return null;
 	}

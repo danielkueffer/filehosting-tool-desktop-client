@@ -14,25 +14,25 @@ import com.danielkueffer.filehosting.desktop.repository.pojos.User;
 public class FileClientImpl implements FileClient {
 
 	@Override
-	public boolean uploadFile(File file) {
+	public boolean uploadFile(File file, String authToken) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public String getFileByPath(String path) {
+	public String getFileByPath(String path, String authToken) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String getFilesByUser(User currentUser) {
+	public String getFilesByUser(User currentUser, String authToken) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public boolean deleteFile(String path) {
+	public boolean deleteFile(String path, String authToken) {
 		// TODO Auto-generated method stub
 		return false;
 	}

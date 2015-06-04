@@ -11,11 +11,11 @@ import com.danielkueffer.filehosting.desktop.repository.pojos.User;
  * 
  */
 public interface FileClient {
-	boolean uploadFile(File file);
+	boolean uploadFile(File file, String authToken);
 	
-	String getFileByPath(String path);
+	String getFileByPath(String path, String authToken);
 	
-	String getFilesByUser(User currentUser);
+	String getFilesByUser(User currentUser, String authToken);
 	
-	boolean deleteFile(String path);
+	boolean deleteFile(String path, String authToken);
 }
