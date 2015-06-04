@@ -1,5 +1,10 @@
 package com.danielkueffer.filehosting.desktop.repository.client.impl;
 
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.Response;
+
 import com.danielkueffer.filehosting.desktop.repository.client.UserClient;
 
 /**
@@ -33,6 +38,15 @@ public class UserClientImpl implements UserClient {
 	 */
 	@Override
 	public String checkServerStatus(String url) {
-		return null;
+		Client client = ClientBuilder.newClient();
+
+		Response res = null;
+
+		try {
+			res = client.target(url).request().get();
+			return res.readEntity(String.class);
+		} catch (ProcessingException pe) {
+			return null;
+		}
 	}
 }

@@ -32,6 +32,9 @@ public class SetupServerUrlController extends AnchorPane implements
 	private Label serverAddressLabel;
 
 	@FXML
+	private Label serverAddressErrorLabel;
+
+	@FXML
 	private Button nextButton;
 
 	@FXML
@@ -84,11 +87,24 @@ public class SetupServerUrlController extends AnchorPane implements
 		}
 
 		String serverAddr = this.serverAddressField.getText();
+		String url = serverAddr;
 
-		if (! this.userService.checkServerStatus(serverAddr)) {
+		if (!serverAddr.startsWith("http://")
+				&& !serverAddr.startsWith("https://")) {
+			url = "http://" + serverAddr;
+		}
+
+		// Check if the server URL is correct
+		if (!this.userService.checkServerStatus(url)) {
+			
+			this.serverAddressErrorLabel.setText(this.bundle
+					.getString("setupServerAddressError") + url);
+
+			this.serverAddressErrorLabel.setVisible(true);
+
 			return;
 		} else {
-			// Save property
+			this.serverAddressErrorLabel.setVisible(false);
 		}
 
 		this.application.goToSetupAccount();

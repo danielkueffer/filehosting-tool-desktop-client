@@ -1,6 +1,12 @@
 package com.danielkueffer.filehosting.desktop.service.impl;
 
 import java.io.File;
+import java.io.StringReader;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.stream.JsonParsingException;
 
 import com.danielkueffer.filehosting.desktop.repository.client.UserClient;
 import com.danielkueffer.filehosting.desktop.repository.pojos.User;
@@ -49,17 +55,31 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public boolean checkServerStatus(String url) {
 
-		if (!url.startsWith("http://") || !url.startsWith("https://")) {
-			url = "http://" + url;
+		// Add the status path to the URL
+		if (url.endsWith("/")) {
+			url = url + "resource/status";
+		} else {
+			url = url + "/resource/status";
 		}
 
-		url = url + "/resource/status";
-
+		// Get the JSON string from the server
 		String res = this.userClient.checkServerStatus(url);
 
-		System.out.println(res);
+		if (res == null) {
+			return false;
+		}
 
-		return false;
+		// Read the string as JSON
+		JsonReader reader = Json.createReader(new StringReader(res));
+		try {
+			JsonObject jObj = reader.readObject();
+
+			// Address is correct
+			return jObj.getBoolean("installed");
+		} catch (JsonParsingException jpe) {
+			// Invalid JSON, Address incorrect
+			return false;
+		}
 	}
 
 }
