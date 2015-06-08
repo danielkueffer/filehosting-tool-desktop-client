@@ -10,7 +10,8 @@ public enum PropertiesKeys {
 
 	SERVER_ADDRESS("serverAddress"),
 	USERNAME("username"),
-	PASSWORD("password");
+	PASSWORD("password"),
+	HOME_FOLDER("homeFolder");
 
 	private final String value;
 

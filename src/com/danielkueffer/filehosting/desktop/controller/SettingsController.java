@@ -16,6 +16,8 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
 
 import com.danielkueffer.filehosting.desktop.Main;
+import com.danielkueffer.filehosting.desktop.service.PropertyService;
+import com.danielkueffer.filehosting.desktop.service.UserService;
 
 /**
  * The settings controller
@@ -39,6 +41,8 @@ public class SettingsController extends AnchorPane implements Initializable {
 
 	private ResourceBundle bundle;
 	private Main application;
+	private UserService userService;
+	private PropertyService propertyService;
 
 	/**
 	 * Initialize the controller
@@ -67,6 +71,24 @@ public class SettingsController extends AnchorPane implements Initializable {
 	public void setApp(Main application) {
 		this.application = application;
 	}
+	
+	/**
+	 * Set the user service
+	 * 
+	 * @param userService
+	 */
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
+	
+	/**
+	 * Set the property service
+	 * 
+	 * @param propertyService
+	 */
+	public void setPropertyService(PropertyService propertyService) {
+		this.propertyService = propertyService;
+	}
 
 	/**
 	 * Show user account view
@@ -78,6 +100,8 @@ public class SettingsController extends AnchorPane implements Initializable {
 			UserAccountController userAccountController = (UserAccountController) this
 					.replaceTabContent("view/UserAccount.fxml", tab);
 			userAccountController.setApp(this.application, this);
+			userAccountController.setUserService(this.userService);
+			userAccountController.setPropertyService(this.propertyService);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

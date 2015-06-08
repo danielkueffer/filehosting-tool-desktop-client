@@ -38,16 +38,34 @@ public class UserClientImpl implements UserClient {
 		return res.readEntity(String.class);
 	}
 
+	/**
+	 * Logout of the REST resource
+	 */
 	@Override
-	public boolean logout(String authToken) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean logout(String url, String authToken) {
+		Client client = ClientBuilder.newClient();
+
+		Form form = new Form();
+		client.target(url)
+				.request()
+				.header("auth_token", authToken)
+				.post(Entity.entity(form,
+						MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+
+		return true;
 	}
 
+	/**
+	 * Get the user data of the logged in user
+	 */
 	@Override
-	public String getUserByUsername(String username, String authToken) {
-		// TODO Auto-generated method stub
-		return null;
+	public String getUserInfo(String url, String authToken) {
+		Client client = ClientBuilder.newClient();
+
+		Response res = client.target(url).request()
+				.header("auth_token", authToken).get();
+
+		return res.readEntity(String.class);
 	}
 
 	/**

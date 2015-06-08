@@ -4,6 +4,9 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import com.danielkueffer.filehosting.desktop.Main;
+import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
+import com.danielkueffer.filehosting.desktop.service.PropertyService;
+import com.danielkueffer.filehosting.desktop.service.UserService;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -29,6 +32,8 @@ public class UserAccountController extends Parent implements Initializable {
 	private ResourceBundle bundle;
 	private Main application;
 	private SettingsController settingsController;
+	private UserService userService;
+	private PropertyService propertyService;
 
 	/**
 	 * Initialize the controller
@@ -54,6 +59,24 @@ public class UserAccountController extends Parent implements Initializable {
 	}
 
 	/**
+	 * Set the user service
+	 * 
+	 * @param userService
+	 */
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
+
+	/**
+	 * Set the property service
+	 * 
+	 * @param propertyService
+	 */
+	public void setPropertyService(PropertyService propertyService) {
+		this.propertyService = propertyService;
+	}
+
+	/**
 	 * Edit setup button
 	 * 
 	 * @param evt
@@ -65,4 +88,34 @@ public class UserAccountController extends Parent implements Initializable {
 
 		this.application.goToSetupServer();
 	}
+
+	public void logoutEvent(ActionEvent evt) {
+		if (this.application == null) {
+			return;
+		}
+
+		this.userService.logout();
+	}
+
+	public void loginEvent(ActionEvent evt) {
+		if (this.application == null) {
+			return;
+		}
+
+		String username = this.propertyService
+				.getProperty(PropertiesKeys.USERNAME.getValue());
+		String password = this.propertyService
+				.getProperty(PropertiesKeys.PASSWORD.getValue());
+
+		this.userService.login(username, password);
+	}
+
+	public void userInfoEvent(ActionEvent evt) {
+		if (this.application == null) {
+			return;
+		}
+
+		this.userService.getUser();
+	}
+
 }

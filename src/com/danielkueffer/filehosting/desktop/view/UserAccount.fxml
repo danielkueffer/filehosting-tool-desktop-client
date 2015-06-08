@@ -29,6 +29,13 @@
         <HBox alignment="BOTTOM_LEFT" prefHeight="100.0" prefWidth="200.0">
           <children>
             <Button fx:id="editAccountButton" mnemonicParsing="false" onAction="#editSetup" text="Edit Accont" />
+            <Button mnemonicParsing="false" onAction="#logoutEvent" text="Logout">
+              <HBox.margin>
+                <Insets left="20.0" fx:id="x1" />
+              </HBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#loginEvent" text="Login" HBox.margin="$x1" />
+            <Button mnemonicParsing="false" onAction="#userInfoEvent" text="User Info" HBox.margin="$x1" />
           </children>
         </HBox>
       </children>

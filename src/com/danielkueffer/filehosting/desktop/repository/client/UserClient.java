@@ -9,9 +9,9 @@ package com.danielkueffer.filehosting.desktop.repository.client;
 public interface UserClient {
 	String login(String url, String username, String password);
 	
-	boolean logout(String authToken);
+	boolean logout(String url, String authToken);
 	
-	String getUserByUsername(String username, String authToken);
+	String getUserInfo(String url, String authToken);
 	
 	String checkServerStatus(String url);
 }

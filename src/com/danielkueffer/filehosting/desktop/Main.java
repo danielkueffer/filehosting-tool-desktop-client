@@ -16,6 +16,7 @@ import com.danielkueffer.filehosting.desktop.controller.SettingsController;
 import com.danielkueffer.filehosting.desktop.controller.SetupAccountController;
 import com.danielkueffer.filehosting.desktop.controller.SetupHomeFolderController;
 import com.danielkueffer.filehosting.desktop.controller.SetupServerUrlController;
+import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
 import com.danielkueffer.filehosting.desktop.repository.client.FileClient;
 import com.danielkueffer.filehosting.desktop.repository.client.UserClient;
 import com.danielkueffer.filehosting.desktop.repository.client.impl.FileClientImpl;
@@ -94,10 +95,22 @@ public class Main extends Application {
 		this.currentLocale = new Locale("de", "DE");
 		// this.currentLocale = new Locale("en", "EN");
 
+		String username = this.propertyService
+				.getProperty(PropertiesKeys.USERNAME.getValue());
+		String password = this.propertyService
+				.getProperty(PropertiesKeys.PASSWORD.getValue());
+
+		boolean loginSuccess = false;
+
+		if (username != null && password != null) {
+			loginSuccess = this.userService.login(username, password);
+		}
+
 		// Check if the user is logged in
-		if (this.loggedInUser == null) {
+		if (!loginSuccess) {
 			this.goToSetupServer();
 		} else {
+			this.loggedInUser = this.userService.getUser();
 			this.goToSettings();
 		}
 
@@ -150,6 +163,7 @@ public class Main extends Application {
 			SetupHomeFolderController setupHomeFolderController = (SetupHomeFolderController) this
 					.replaceSceneContent("view/SetupHomeFolder.fxml");
 			setupHomeFolderController.setApp(this);
+			setupHomeFolderController.setPropertyService(this.propertyService);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -165,6 +179,8 @@ public class Main extends Application {
 			SettingsController settingsController = (SettingsController) this
 					.replaceSceneContent("view/Settings.fxml");
 			settingsController.setApp(this);
+			settingsController.setUserService(this.userService);
+			settingsController.setPropertyService(this.propertyService);
 			settingsController.goToUserAccount();
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -12,6 +12,8 @@ import com.danielkueffer.filehosting.desktop.repository.pojos.User;
  */
 public interface UserService {
 	boolean login(String username, String password);
+	
+	boolean logout();
 
 	User getUser();
 

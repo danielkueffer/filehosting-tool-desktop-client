@@ -24,6 +24,8 @@ public class UserServiceImpl implements UserService {
 
 	private static final String STATUS_URL = "resource/status";
 	private static final String LOGIN_URL = "resource/user/login";
+	private static final String LOGOUT_URL = "resource/user/logout";
+	private static final String USER_INFO_URL = "resource/user";
 
 	private UserClient userClient;
 	private PropertyService propertyService;
@@ -60,9 +62,19 @@ public class UserServiceImpl implements UserService {
 		return false;
 	}
 
+	/**
+	 * Get the user info as User object
+	 */
 	@Override
 	public User getUser() {
-		// TODO Auto-generated method stub
+		String url = this.propertyService
+				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
+				+ USER_INFO_URL;
+
+		String userInfo = this.userClient.getUserInfo(url, this.authToken);
+
+		System.out.println(userInfo);
+
 		return null;
 	}
 
@@ -103,6 +115,18 @@ public class UserServiceImpl implements UserService {
 			// Invalid JSON, Address incorrect
 			return false;
 		}
+	}
+	
+	/**
+	 * Logout
+	 */
+	@Override
+	public boolean logout() {
+		String url = this.propertyService
+				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
+				+ LOGOUT_URL;
+		
+		return this.userClient.logout(url, this.authToken);
 	}
 
 	/**
