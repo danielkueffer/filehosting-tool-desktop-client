@@ -10,9 +10,10 @@ public class User {
 
 	private int id;
 
+	private String username;
 	private String email;
-	private String displayname;
-	private String lastLogin;
+	private String displayName;
+	private String language;
 
 	private long diskQuota;
 	private long usedDiskSpace;
@@ -33,6 +34,34 @@ public class User {
 	}
 
 	/**
+	 * @return the username
+	 */
+	public String getUsername() {
+		return username;
+	}
+
+	/**
+	 * @param username the username to set
+	 */
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	/**
+	 * @return the displayName
+	 */
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	/**
+	 * @param displayName the displayName to set
+	 */
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	/**
 	 * @return the email
 	 */
 	public String getEmail() {
@@ -48,33 +77,17 @@ public class User {
 	}
 
 	/**
-	 * @return the displayname
+	 * @return the language
 	 */
-	public String getDisplayname() {
-		return displayname;
+	public String getLanguage() {
+		return language;
 	}
 
 	/**
-	 * @param displayname
-	 *            the displayname to set
+	 * @param language the language to set
 	 */
-	public void setDisplayname(String displayname) {
-		this.displayname = displayname;
-	}
-
-	/**
-	 * @return the lastLogin
-	 */
-	public String getLastLogin() {
-		return lastLogin;
-	}
-
-	/**
-	 * @param lastLogin
-	 *            the lastLogin to set
-	 */
-	public void setLastLogin(String lastLogin) {
-		this.lastLogin = lastLogin;
+	public void setLanguage(String language) {
+		this.language = language;
 	}
 
 	/**
@@ -105,5 +118,16 @@ public class User {
 	 */
 	public void setUsedDiskSpace(long usedDiskSpace) {
 		this.usedDiskSpace = usedDiskSpace;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", username=" + username + ", email=" + email
+				+ ", displayName=" + displayName + ", language=" + language
+				+ ", diskQuota=" + diskQuota + ", usedDiskSpace="
+				+ usedDiskSpace + "]";
 	}
 }

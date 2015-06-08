@@ -93,7 +93,6 @@ public class Main extends Application {
 		this.primaryStage.setMaxHeight(MINIMUM_WINDOW_HEIGHT);
 
 		this.currentLocale = new Locale("de", "DE");
-		// this.currentLocale = new Locale("en", "EN");
 
 		String username = this.propertyService
 				.getProperty(PropertiesKeys.USERNAME.getValue());
@@ -111,6 +110,12 @@ public class Main extends Application {
 			this.goToSetupServer();
 		} else {
 			this.loggedInUser = this.userService.getUser();
+
+			// Set the language of the logged in user
+			if (this.loggedInUser.getLanguage().equals("en")) {
+				this.currentLocale = new Locale("en", "EN");
+			}
+
 			this.goToSettings();
 		}
 
@@ -256,5 +261,12 @@ public class Main extends Application {
 	 */
 	public Locale getCurrentLocale() {
 		return currentLocale;
+	}
+	
+	/**
+	 * @param currentLocale the currentLocale to set
+	 */
+	public void setCurrentLocale(Locale currentLocale) {
+		this.currentLocale = currentLocale;
 	}
 }

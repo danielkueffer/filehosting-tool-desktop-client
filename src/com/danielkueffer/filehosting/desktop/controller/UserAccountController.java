@@ -5,6 +5,7 @@ import java.util.ResourceBundle;
 
 import com.danielkueffer.filehosting.desktop.Main;
 import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
+import com.danielkueffer.filehosting.desktop.repository.pojos.User;
 import com.danielkueffer.filehosting.desktop.service.PropertyService;
 import com.danielkueffer.filehosting.desktop.service.UserService;
 
@@ -115,7 +116,8 @@ public class UserAccountController extends Parent implements Initializable {
 			return;
 		}
 
-		this.userService.getUser();
+		User user = this.userService.getUser();
+		System.out.println(user);
 	}
 
 }

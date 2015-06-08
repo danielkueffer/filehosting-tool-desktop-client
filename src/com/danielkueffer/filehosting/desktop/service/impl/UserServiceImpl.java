@@ -73,9 +73,29 @@ public class UserServiceImpl implements UserService {
 
 		String userInfo = this.userClient.getUserInfo(url, this.authToken);
 
-		System.out.println(userInfo);
+		JsonReader reader = Json.createReader(new StringReader(userInfo));
+		JsonObject jObj = reader.readArray().getJsonObject(0);
 
-		return null;
+		// Parse the JSON object
+		int id = jObj.getInt("id");
+		String username = jObj.getString("username");
+		String displayName = jObj.getString("displayName");
+		String email = jObj.getString("email");
+		String language = jObj.getString("language");
+		long diskQuota = jObj.getInt("diskQuota");
+		long usedDiskSpace = jObj.getInt("usedDiskSpace");
+
+		// Create a new user
+		User user = new User();
+		user.setId(id);
+		user.setUsername(username);
+		user.setDisplayName(displayName);
+		user.setEmail(email);
+		user.setLanguage(language);
+		user.setDiskQuota(diskQuota);
+		user.setUsedDiskSpace(usedDiskSpace);
+
+		return user;
 	}
 
 	@Override
@@ -116,7 +136,7 @@ public class UserServiceImpl implements UserService {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Logout
 	 */
@@ -125,7 +145,7 @@ public class UserServiceImpl implements UserService {
 		String url = this.propertyService
 				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
 				+ LOGOUT_URL;
-		
+
 		return this.userClient.logout(url, this.authToken);
 	}
 

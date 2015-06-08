@@ -1,6 +1,7 @@
 package com.danielkueffer.filehosting.desktop.controller;
 
 import java.net.URL;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 import javafx.beans.value.ChangeListener;
@@ -16,6 +17,7 @@ import javafx.scene.layout.AnchorPane;
 
 import com.danielkueffer.filehosting.desktop.Main;
 import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
+import com.danielkueffer.filehosting.desktop.repository.pojos.User;
 import com.danielkueffer.filehosting.desktop.service.PropertyService;
 import com.danielkueffer.filehosting.desktop.service.UserService;
 
@@ -114,7 +116,7 @@ public class SetupAccountController extends AnchorPane implements Initializable 
 	}
 
 	/**
-	 * Next button event
+	 * Next button event, save user data
 	 * 
 	 * @param evt
 	 */
@@ -135,10 +137,22 @@ public class SetupAccountController extends AnchorPane implements Initializable 
 		} else {
 			this.userAccountErrorLabel.setVisible(false);
 
+			// Save user name and password
 			this.propertyService.saveProperty(
 					PropertiesKeys.USERNAME.getValue(), username);
 			this.propertyService.saveProperty(
 					PropertiesKeys.PASSWORD.getValue(), password);
+			
+			// Set the current user
+			User currentUser = this.userService.getUser();
+			this.application.setLoggedInUser(currentUser);
+			
+			// Set the language of the user
+			if (currentUser.getLanguage().equals("de")) {
+				this.application.setCurrentLocale(new Locale("de", "DE"));
+			} else {
+				this.application.setCurrentLocale(new Locale("en", "EN"));
+			}
 		}
 
 		this.application.goToSetupHomeFolder();
