@@ -9,9 +9,9 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane id="rootPane" prefHeight="433.0" prefWidth="570.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="com.danielkueffer.filehosting.desktop.controller.UserAccountController">
+<AnchorPane id="rootPane" maxHeight="433.0" prefHeight="433.0" prefWidth="570.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="com.danielkueffer.filehosting.desktop.controller.UserAccountController">
   <children>
-    <VBox prefHeight="-1.0" prefWidth="800.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="24.0">
+    <VBox prefHeight="-1.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="0.0">
       <children>
         <HBox prefHeight="15.0" prefWidth="760.0">
           <children>
@@ -39,6 +39,9 @@
           </children>
         </HBox>
       </children>
+      <padding>
+        <Insets bottom="20.0" top="24.0" />
+      </padding>
     </VBox>
   </children>
   <padding>
