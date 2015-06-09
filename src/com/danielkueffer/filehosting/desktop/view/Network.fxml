@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane id="rootPane" prefHeight="500.0" prefWidth="570.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="com.danielkueffer.filehosting.desktop.controller.NetworkController">
+<AnchorPane id="rootPane" prefHeight="433.0" prefWidth="570.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="com.danielkueffer.filehosting.desktop.controller.NetworkController">
   <children>
     <VBox prefHeight="-1.0" prefWidth="800.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="24.0">
       <children>
@@ -26,6 +26,74 @@
           </padding>
         </HBox>
         <Separator prefWidth="200.0" />
+        <GridPane gridLinesVisible="false">
+          <children>
+            <Label fx:id="proxySettingsLabel" text="Proxy settings:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+              <children>
+                <RadioButton fx:id="noProxyRadio" mnemonicParsing="false" selected="true" text="No proxy" VBox.vgrow="ALWAYS">
+                  <toggleGroup>
+                    <ToggleGroup fx:id="proxy" />
+                  </toggleGroup>
+                  <VBox.margin>
+                    <Insets bottom="10.0" />
+                  </VBox.margin>
+                </RadioButton>
+                <RadioButton fx:id="manualProxyRadio" mnemonicParsing="false" text="Manual" toggleGroup="$proxy" />
+              </children>
+              <GridPane.margin>
+                <Insets top="32.0" />
+              </GridPane.margin>
+            </VBox>
+            <Label fx:id="proxyServerLabel" styleClass="grey-text" text="Server:" textFill="#292929" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <TextField fx:id="proxyServerField" disable="true" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <CheckBox fx:id="requiresPasswordCheckBox" disable="true" mnemonicParsing="false" text="Proxy server requires password" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
+              <children>
+                <Label fx:id="separatorLabel" styleClass="grey-text" text=":">
+                  <HBox.margin>
+                    <Insets left="7.0" right="7.0" top="5.0" />
+                  </HBox.margin>
+                </Label>
+                <TextField fx:id="proxyPortField" disable="true" prefWidth="200.0" promptText="" text="8080">
+                  <HBox.margin>
+                    <Insets top="4.0" />
+                  </HBox.margin>
+                </TextField>
+              </children>
+            </HBox>
+            <Label fx:id="proxyUsernameLabel" styleClass="grey-text" text="Username:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+            <Label fx:id="proxyPasswordLabel" styleClass="grey-text" text="Password:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+            <TextField fx:id="proxyUsernameField" disable="true" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <PasswordField fx:id="proxyPasswordField" disable="true" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+          </children>
+          <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="137.0" minWidth="137.0" prefWidth="137.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="403.0" minWidth="298.0" prefWidth="298.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="403.0" minWidth="105.0" prefWidth="105.0" />
+          </columnConstraints>
+          <rowConstraints>
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          </rowConstraints>
+          <VBox.margin>
+            <Insets top="10.0" />
+          </VBox.margin>
+        </GridPane>
+        <HBox alignment="BOTTOM_RIGHT" fillHeight="false" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+          <children>
+            <Button fx:id="saveButton" mnemonicParsing="false" onAction="#saveAction" text="Save" HBox.hgrow="ALWAYS" />
+            <Button fx:id="closeButton" mnemonicParsing="false" onAction="#closeAction" text="Close">
+              <HBox.margin>
+                <Insets left="15.0" />
+              </HBox.margin>
+            </Button>
+          </children>
+        </HBox>
       </children>
     </VBox>
   </children>
