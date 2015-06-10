@@ -73,27 +73,34 @@ public class UserServiceImpl implements UserService {
 
 		String userInfo = this.userClient.getUserInfo(url, this.authToken);
 
+		User user = null;
+
 		JsonReader reader = Json.createReader(new StringReader(userInfo));
-		JsonObject jObj = reader.readArray().getJsonObject(0);
 
-		// Parse the JSON object
-		int id = jObj.getInt("id");
-		String username = jObj.getString("username");
-		String displayName = jObj.getString("displayName");
-		String email = jObj.getString("email");
-		String language = jObj.getString("language");
-		long diskQuota = jObj.getInt("diskQuota");
-		long usedDiskSpace = jObj.getInt("usedDiskSpace");
+		try {
+			JsonObject jObj = reader.readArray().getJsonObject(0);
 
-		// Create a new user
-		User user = new User();
-		user.setId(id);
-		user.setUsername(username);
-		user.setDisplayName(displayName);
-		user.setEmail(email);
-		user.setLanguage(language);
-		user.setDiskQuota(diskQuota);
-		user.setUsedDiskSpace(usedDiskSpace);
+			// Parse the JSON object
+			int id = jObj.getInt("id");
+			String username = jObj.getString("username");
+			String displayName = jObj.getString("displayName");
+			String email = jObj.getString("email");
+			String language = jObj.getString("language");
+			long diskQuota = jObj.getInt("diskQuota");
+			long usedDiskSpace = jObj.getInt("usedDiskSpace");
+
+			// Create a new user
+			user = new User();
+			user.setId(id);
+			user.setUsername(username);
+			user.setDisplayName(displayName);
+			user.setEmail(email);
+			user.setLanguage(language);
+			user.setDiskQuota(diskQuota);
+			user.setUsedDiskSpace(usedDiskSpace);
+		} catch (JsonParsingException jpe) {
+			// User not logged in
+		}
 
 		return user;
 	}

@@ -71,7 +71,7 @@ public class SettingsController extends AnchorPane implements Initializable {
 	public void setApp(Main application) {
 		this.application = application;
 	}
-	
+
 	/**
 	 * Set the user service
 	 * 
@@ -80,7 +80,7 @@ public class SettingsController extends AnchorPane implements Initializable {
 	public void setUserService(UserService userService) {
 		this.userService = userService;
 	}
-	
+
 	/**
 	 * Set the property service
 	 * 
@@ -132,6 +132,7 @@ public class SettingsController extends AnchorPane implements Initializable {
 			NetworkController networkController = (NetworkController) this
 					.replaceTabContent("view/Network.fxml", tab);
 			networkController.setApp(this.application, this);
+			networkController.setPropertyService(this.propertyService);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

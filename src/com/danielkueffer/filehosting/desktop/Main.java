@@ -120,6 +120,7 @@ public class Main extends Application {
 		}
 
 		this.primaryStage.show();
+		this.primaryStage.centerOnScreen();
 	}
 
 	/**
@@ -225,7 +226,7 @@ public class Main extends Application {
 			winWidth = SETUP_WINDOW_WIDTH;
 			winHeight = SETUP_WINDOW_HEIGHT;
 		}
-
+		
 		Scene scene = new Scene(pane, winWidth, winHeight);
 		this.primaryStage.setScene(scene);
 		this.primaryStage.sizeToScene();

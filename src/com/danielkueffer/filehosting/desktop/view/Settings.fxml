@@ -9,9 +9,9 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane id="rootPane" prefHeight="500.0" prefWidth="700.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="com.danielkueffer.filehosting.desktop.controller.SettingsController">
+<AnchorPane id="rootPane" maxHeight="500.0" prefHeight="500.0" prefWidth="700.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="com.danielkueffer.filehosting.desktop.controller.SettingsController">
   <children>
-    <TabPane fx:id="settingsTabPane" prefHeight="500.0" prefWidth="700.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <TabPane fx:id="settingsTabPane" maxHeight="500.0" prefHeight="500.0" prefWidth="700.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <tabs>
         <Tab fx:id="userAccountTab" content="$null" text="User Account" />
         <Tab fx:id="activitiesTab" content="$null" text="Activities" />
