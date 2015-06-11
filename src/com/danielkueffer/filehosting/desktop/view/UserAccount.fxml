@@ -26,16 +26,53 @@
           </padding>
         </HBox>
         <Separator prefWidth="200.0" />
+        <HBox prefHeight="100.0" prefWidth="200.0">
+          <children>
+            <VBox minWidth="325.0" prefHeight="80.0" prefWidth="346.0">
+              <children>
+                <TextArea fx:id="connectionLabel" disable="false" editable="false" focusTraversable="true" prefWidth="200.0" styleClass="plain-text-area" text="connectionLabel" wrapText="true" />
+                <TextArea fx:id="localFolderLabel" editable="false" focusTraversable="false" prefWidth="200.0" styleClass="plain-text-area" text="localFolderLabel" wrapText="true" />
+              </children>
+              <HBox.margin>
+                <Insets top="10.0" fx:id="x3" />
+              </HBox.margin>
+            </VBox>
+            <Separator orientation="VERTICAL" prefHeight="200.0" />
+            <VBox alignment="CENTER" minWidth="200.0" prefHeight="100.0" prefWidth="200.0" HBox.hgrow="SOMETIMES" HBox.margin="$x4">
+              <children>
+                <Button fx:id="syncButton" mnemonicParsing="false" onAction="#syncEvent" prefWidth="200.0" text="Start Synchronization">
+                  <VBox.margin>
+                    <Insets fx:id="x4" />
+                  </VBox.margin>
+                </Button>
+              </children>
+              <padding>
+                <Insets left="20.0" fx:id="x1" />
+              </padding>
+            </VBox>
+          </children>
+        </HBox>
+        <Separator prefWidth="200.0" />
+        <VBox prefHeight="200.0" prefWidth="100.0" VBox.margin="$x3">
+          <children>
+            <Label text="Used disk space" textFill="#404040">
+              <VBox.margin>
+                <Insets bottom="10.0" fx:id="x2" />
+              </VBox.margin>
+            </Label>
+            <ProgressBar prefHeight="16.0" prefWidth="540.0" progress="0.09" VBox.margin="$x2" VBox.vgrow="ALWAYS" />
+            <Label prefWidth="540.0" text="Disk space value" VBox.margin="$x2" />
+            <Separator prefWidth="200.0" />
+          </children>
+        </VBox>
         <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
           <children>
-            <Button fx:id="editAccountButton" mnemonicParsing="false" onAction="#editSetup" text="Edit Accont" />
-            <Button mnemonicParsing="false" onAction="#logoutEvent" text="Logout">
+            <Button fx:id="editAccountButton" mnemonicParsing="false" onAction="#editSetup" prefWidth="-1.0" text="Edit Accont" />
+            <Button fx:id="closeButton" mnemonicParsing="false" onAction="#closeEvent" text="Close">
               <HBox.margin>
-                <Insets left="20.0" fx:id="x1" />
+                <Insets left="20.0" fx:id="x5" />
               </HBox.margin>
             </Button>
-            <Button mnemonicParsing="false" onAction="#loginEvent" text="Login" HBox.margin="$x1" />
-            <Button mnemonicParsing="false" onAction="#userInfoEvent" text="User Info" HBox.margin="$x1" />
           </children>
         </HBox>
       </children>
@@ -45,7 +82,7 @@
     </VBox>
   </children>
   <padding>
-    <Insets />
+    <Insets fx:id="x6" />
   </padding>
   <stylesheets>
     <URL value="@application.css" />

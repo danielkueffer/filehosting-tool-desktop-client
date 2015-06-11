@@ -139,6 +139,15 @@ public class SettingsController extends AnchorPane implements Initializable {
 	}
 
 	/**
+	 * Select a tab
+	 * 
+	 * @param idx
+	 */
+	public void selectIndexTab(int idx) {
+		this.settingsTabPane.getSelectionModel().select(idx);
+	}
+
+	/**
 	 * Change tab template
 	 * 
 	 * @param fxml

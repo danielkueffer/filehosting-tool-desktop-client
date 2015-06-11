@@ -88,7 +88,6 @@ public class UserClientImpl implements UserClient {
 
 			return res.readEntity(String.class);
 		} catch (ProcessingException pe) {
-			pe.printStackTrace();
 			return null;
 		}
 	}

@@ -99,6 +99,9 @@ public class Main extends Application {
 
 		this.currentLocale = new Locale("de", "DE");
 
+		String serverAddress = this.propertyService
+				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue());
+
 		String username = this.propertyService
 				.getProperty(PropertiesKeys.USERNAME.getValue());
 		String password = this.propertyService
@@ -106,8 +109,11 @@ public class Main extends Application {
 
 		boolean loginSuccess = false;
 
-		if (username != null && password != null) {
-			loginSuccess = this.userService.login(username, password);
+		// Check for server connection first, then login
+		if (serverAddress != null && username != null && password != null) {
+			if (this.userService.checkServerStatus(serverAddress)) {
+				loginSuccess = this.userService.login(username, password);
+			}
 		}
 
 		// Check if the user is logged in
@@ -199,10 +205,10 @@ public class Main extends Application {
 				settingsController.goToUserAccount();
 				break;
 			case ACTIVITIES:
-				settingsController.goToActivities();
+				settingsController.selectIndexTab(1);
 				break;
 			case NETWORK:
-				settingsController.goToNetwork();
+				settingsController.selectIndexTab(2);
 				break;
 			}
 

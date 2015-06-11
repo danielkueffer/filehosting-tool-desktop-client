@@ -28,7 +28,7 @@
         <Separator prefWidth="200.0" />
         <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
           <children>
-            <Button mnemonicParsing="false" text="Close" />
+            <Button fx:id="closeButton" mnemonicParsing="false" onAction="#closeAction" text="Close" />
           </children>
         </HBox>
       </children>

@@ -3,18 +3,20 @@ package com.danielkueffer.filehosting.desktop.controller;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import com.danielkueffer.filehosting.desktop.Main;
-import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
-import com.danielkueffer.filehosting.desktop.repository.pojos.User;
-import com.danielkueffer.filehosting.desktop.service.PropertyService;
-import com.danielkueffer.filehosting.desktop.service.UserService;
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextArea;
+
+import com.danielkueffer.filehosting.desktop.Main;
+import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
+import com.danielkueffer.filehosting.desktop.repository.pojos.User;
+import com.danielkueffer.filehosting.desktop.service.PropertyService;
+import com.danielkueffer.filehosting.desktop.service.UserService;
 
 /**
  * The user account controller
@@ -28,7 +30,28 @@ public class UserAccountController extends Parent implements Initializable {
 	private Label userAccountTitle;
 
 	@FXML
+	private TextArea connectionLabel;
+
+	@FXML
+	private TextArea localFolderLabel;
+
+	@FXML
+	private Label usedDiskSpaceLabel;
+
+	@FXML
+	private Label diskSpaceValueLabel;
+
+	@FXML
+	private Button syncButton;
+
+	@FXML
+	private Button closeButton;
+
+	@FXML
 	private Button editAccountButton;
+
+	@FXML
+	private ProgressBar diskSpaceBar;
 
 	private ResourceBundle bundle;
 	private Main application;
@@ -46,6 +69,8 @@ public class UserAccountController extends Parent implements Initializable {
 				.getString("settingsUserAccount"));
 		this.editAccountButton.setText(this.bundle
 				.getString("settingsEditAccount"));
+
+		this.closeButton.setText(this.bundle.getString("settingsClose"));
 	}
 
 	/**
@@ -75,6 +100,62 @@ public class UserAccountController extends Parent implements Initializable {
 	 */
 	public void setPropertyService(PropertyService propertyService) {
 		this.propertyService = propertyService;
+
+		String serverAddress = this.propertyService
+				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue());
+
+		User user = this.application.getLoggedInUser();
+
+		// Set the connection label
+		if (serverAddress != null) {
+			// Connected
+			if (this.userService.checkServerStatus(serverAddress)) {
+				String username = "";
+
+				if (user != null) {
+					username = user.getUsername();
+				}
+
+				StringBuilder sb = new StringBuilder();
+				sb.append(this.bundle.getString("settingsConnected"));
+				sb.append(" ");
+				sb.append(serverAddress);
+				sb.append(" ");
+				sb.append(this.bundle.getString("settingsAs"));
+				sb.append(" ");
+				sb.append(username);
+
+				this.connectionLabel.setText(sb.toString());
+
+				this.syncButton.setDisable(false);
+			} else {
+				// Not connected
+				StringBuilder sb = new StringBuilder();
+				sb.append(this.bundle.getString("settingsNotConnected") + " "
+						+ serverAddress);
+
+				this.connectionLabel.setText(sb.toString());
+				this.syncButton.setDisable(true);
+			}
+		} else {
+			this.connectionLabel.setText(this.bundle
+					.getString("settingsNoAddress"));
+			
+			this.syncButton.setDisable(true);
+		}
+
+		String localFolder = this.propertyService
+				.getProperty(PropertiesKeys.HOME_FOLDER.getValue());
+
+		// Set the local folder
+		if (localFolder != null) {
+			this.localFolderLabel.setText(this.bundle
+					.getString("setupLocalFolder") + ": " + localFolder);
+		} else {
+			this.localFolderLabel.setText(this.bundle
+					.getString("settingsLocalFolderEmpty"));
+		}
+
 	}
 
 	/**
@@ -90,34 +171,29 @@ public class UserAccountController extends Parent implements Initializable {
 		this.application.goToSetupServer();
 	}
 
-	public void logoutEvent(ActionEvent evt) {
+	/**
+	 * Close event
+	 * 
+	 * @param evt
+	 */
+	public void closeEvent(ActionEvent evt) {
 		if (this.application == null) {
 			return;
 		}
 
-		this.userService.logout();
+		System.out.println("close");
 	}
 
-	public void loginEvent(ActionEvent evt) {
+	/**
+	 * Synchronization start or stop event
+	 * 
+	 * @param evt
+	 */
+	public void syncEvent(ActionEvent evt) {
 		if (this.application == null) {
 			return;
 		}
 
-		String username = this.propertyService
-				.getProperty(PropertiesKeys.USERNAME.getValue());
-		String password = this.propertyService
-				.getProperty(PropertiesKeys.PASSWORD.getValue());
-
-		this.userService.login(username, password);
+		System.out.println("sync");
 	}
-
-	public void userInfoEvent(ActionEvent evt) {
-		if (this.application == null) {
-			return;
-		}
-
-		User user = this.userService.getUser();
-		System.out.println(user);
-	}
-
 }

@@ -1,3 +1,13 @@
 .grey-text {
 	-fx-text-fill: #888;
 }
+
+.plain-text-area {
+	-fx-focus-color: transparent;
+	-fx-background-color: #fff, #fff;
+}
+
+.plain-text-area .content {
+	-fx-background-color: #fff;
+	-fx-padding: 0;
+}
