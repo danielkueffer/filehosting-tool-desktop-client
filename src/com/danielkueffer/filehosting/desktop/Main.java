@@ -17,6 +17,8 @@ import com.danielkueffer.filehosting.desktop.controller.SetupAccountController;
 import com.danielkueffer.filehosting.desktop.controller.SetupHomeFolderController;
 import com.danielkueffer.filehosting.desktop.controller.SetupServerUrlController;
 import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
+import com.danielkueffer.filehosting.desktop.enums.TabKeys;
+import com.danielkueffer.filehosting.desktop.helper.NetworkHelper;
 import com.danielkueffer.filehosting.desktop.repository.client.FileClient;
 import com.danielkueffer.filehosting.desktop.repository.client.UserClient;
 import com.danielkueffer.filehosting.desktop.repository.client.impl.FileClientImpl;
@@ -87,6 +89,9 @@ public class Main extends Application {
 		this.fileService = new FileServiceImpl(fileClient, propertyService,
 				userService);
 
+		// Set the propertyService in the network helper
+		NetworkHelper.setPropertyService(this.propertyService);
+
 		this.primaryStage = primaryStage;
 		this.primaryStage.setTitle(APP_NAME);
 		this.primaryStage.setMinWidth(MINIMUM_WINDOW_WIDTH);
@@ -116,7 +121,7 @@ public class Main extends Application {
 				this.currentLocale = new Locale("en", "EN");
 			}
 
-			this.goToSettings();
+			this.goToSettings(TabKeys.USER);
 		}
 
 		this.primaryStage.show();
@@ -178,7 +183,7 @@ public class Main extends Application {
 	/**
 	 * Go to the settings view
 	 */
-	public void goToSettings() {
+	public void goToSettings(TabKeys view) {
 		try {
 			this.setupScene = false;
 
@@ -187,7 +192,20 @@ public class Main extends Application {
 			settingsController.setApp(this);
 			settingsController.setUserService(this.userService);
 			settingsController.setPropertyService(this.propertyService);
-			settingsController.goToUserAccount();
+
+			// Select a tab
+			switch (view) {
+			case USER:
+				settingsController.goToUserAccount();
+				break;
+			case ACTIVITIES:
+				settingsController.goToActivities();
+				break;
+			case NETWORK:
+				settingsController.goToNetwork();
+				break;
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -226,7 +244,7 @@ public class Main extends Application {
 			winWidth = SETUP_WINDOW_WIDTH;
 			winHeight = SETUP_WINDOW_HEIGHT;
 		}
-		
+
 		Scene scene = new Scene(pane, winWidth, winHeight);
 		this.primaryStage.setScene(scene);
 		this.primaryStage.sizeToScene();
@@ -263,9 +281,10 @@ public class Main extends Application {
 	public Locale getCurrentLocale() {
 		return currentLocale;
 	}
-	
+
 	/**
-	 * @param currentLocale the currentLocale to set
+	 * @param currentLocale
+	 *            the currentLocale to set
 	 */
 	public void setCurrentLocale(Locale currentLocale) {
 		this.currentLocale = currentLocale;

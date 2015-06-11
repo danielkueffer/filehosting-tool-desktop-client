@@ -35,7 +35,8 @@
               <children>
                 <Label fx:id="serverAddressLabel" prefHeight="18.999908447265625" text="Serveraddress:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                 <TextField fx:id="serverAddressField" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                <Label fx:id="serverAddressErrorLabel" disable="false" prefWidth="514.0" text="Address Error" textFill="#cc0000" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Hyperlink fx:id="proxySettingsLink" onAction="#goToProxySettings" text="Proxy settings" textFill="#0066ff" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label fx:id="serverAddressErrorLabel" disable="false" prefWidth="514.0" text="Address Error" textFill="#cc0000" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
               </children>
               <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="325.0" minWidth="10.0" prefWidth="122.0" />

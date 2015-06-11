@@ -9,12 +9,14 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 
 import com.danielkueffer.filehosting.desktop.Main;
 import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
+import com.danielkueffer.filehosting.desktop.enums.TabKeys;
 import com.danielkueffer.filehosting.desktop.service.PropertyService;
 import com.danielkueffer.filehosting.desktop.service.UserService;
 
@@ -42,6 +44,9 @@ public class SetupServerUrlController extends AnchorPane implements
 	@FXML
 	private TextField serverAddressField;
 
+	@FXML
+	private Hyperlink proxySettingsLink;
+
 	private ResourceBundle bundle;
 	private Main application;
 	private UserService userService;
@@ -57,6 +62,8 @@ public class SetupServerUrlController extends AnchorPane implements
 		this.nextButton.setText(this.bundle.getString("setupNext"));
 		this.serverAddressLabel.setText(this.bundle
 				.getString("setupServerAddress"));
+		this.proxySettingsLink.setText(this.bundle
+				.getString("proxySettingsLink"));
 
 		this.serverAddressField.textProperty().addListener(textChange);
 	}
@@ -135,6 +142,19 @@ public class SetupServerUrlController extends AnchorPane implements
 		}
 
 		this.application.goToSetupAccount();
+	}
+
+	/**
+	 * PROXY settings event
+	 * 
+	 * @param evt
+	 */
+	public void goToProxySettings(ActionEvent evt) {
+		if (this.application == null) {
+			return;
+		}
+
+		this.application.goToSettings(TabKeys.NETWORK);
 	}
 
 	/**

@@ -1,13 +1,15 @@
 package com.danielkueffer.filehosting.desktop.repository.client.impl;
 
 import javax.ws.rs.ProcessingException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+
+import com.danielkueffer.filehosting.desktop.helper.NetworkHelper;
 import com.danielkueffer.filehosting.desktop.repository.client.UserClient;
 
 /**
@@ -23,7 +25,8 @@ public class UserClientImpl implements UserClient {
 	 */
 	@Override
 	public String login(String url, String username, String password) {
-		Client client = ClientBuilder.newClient();
+		ResteasyClient client = new ResteasyClientBuilder().httpEngine(
+				NetworkHelper.getEngine()).build();
 
 		Form form = new Form();
 		form.param("username", username);
@@ -43,7 +46,8 @@ public class UserClientImpl implements UserClient {
 	 */
 	@Override
 	public boolean logout(String url, String authToken) {
-		Client client = ClientBuilder.newClient();
+		ResteasyClient client = new ResteasyClientBuilder().httpEngine(
+				NetworkHelper.getEngine()).build();
 
 		Form form = new Form();
 		client.target(url)
@@ -60,7 +64,8 @@ public class UserClientImpl implements UserClient {
 	 */
 	@Override
 	public String getUserInfo(String url, String authToken) {
-		Client client = ClientBuilder.newClient();
+		ResteasyClient client = new ResteasyClientBuilder().httpEngine(
+				NetworkHelper.getEngine()).build();
 
 		Response res = client.target(url).request()
 				.header("auth_token", authToken).get();
@@ -73,14 +78,17 @@ public class UserClientImpl implements UserClient {
 	 */
 	@Override
 	public String checkServerStatus(String url) {
-		Client client = ClientBuilder.newClient();
+		ResteasyClient client = new ResteasyClientBuilder().httpEngine(
+				NetworkHelper.getEngine()).build();
 
 		Response res = null;
 
 		try {
 			res = client.target(url).request().get();
+
 			return res.readEntity(String.class);
 		} catch (ProcessingException pe) {
+			pe.printStackTrace();
 			return null;
 		}
 	}

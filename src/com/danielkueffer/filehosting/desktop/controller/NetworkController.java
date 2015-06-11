@@ -75,6 +75,9 @@ public class NetworkController extends Parent implements Initializable {
 	@FXML
 	private Button closeButton;
 
+	@FXML
+	private Button editAccountButton;
+
 	private ResourceBundle bundle;
 	private Main application;
 	private SettingsController settingsController;
@@ -100,6 +103,9 @@ public class NetworkController extends Parent implements Initializable {
 
 		this.saveButton.setText(this.bundle.getString("settingsSave"));
 		this.closeButton.setText(this.bundle.getString("settingsClose"));
+
+		this.editAccountButton.setText(this.bundle
+				.getString("settingsEditAccount"));
 
 		this.requiresPasswordCheckBox.setText(this.bundle
 				.getString("proxyPasswordRequired"));
@@ -163,6 +169,11 @@ public class NetworkController extends Parent implements Initializable {
 	public void setApp(Main application, SettingsController settingsController) {
 		this.application = application;
 		this.settingsController = settingsController;
+		
+		// Show the edit account button only if no user is logged in
+		if (this.application.getLoggedInUser() == null) {
+			this.editAccountButton.setVisible(true);
+		}
 	}
 
 	/**
@@ -256,13 +267,13 @@ public class NetworkController extends Parent implements Initializable {
 		boolean isManual = (boolean) this.noProxyRadio.toggleGroupProperty()
 				.get().getSelectedToggle().getUserData();
 
+		boolean proxyAuth = this.requiresPasswordCheckBox.selectedProperty()
+				.get();
+
 		// Save the PROXY settings
 		if (isManual) {
 			this.propertyService.saveProperty(
 					PropertiesKeys.PROXY_ENABLED.getValue(), "true");
-
-			boolean proxyAuth = this.requiresPasswordCheckBox
-					.selectedProperty().get();
 
 			String proxyServer = this.proxyServerField.getText();
 			String proxyPort = this.proxyPortField.getText();
@@ -283,6 +294,9 @@ public class NetworkController extends Parent implements Initializable {
 		} else {
 			this.propertyService.saveProperty(
 					PropertiesKeys.PROXY_ENABLED.getValue(), "false");
+			this.propertyService.saveProperty(
+					PropertiesKeys.PROXY_AUTHENTICATION.getValue(), proxyAuth
+							+ "");
 		}
 	}
 
@@ -297,6 +311,19 @@ public class NetworkController extends Parent implements Initializable {
 		}
 
 		System.out.println("close");
+	}
+
+	/**
+	 * Edit setup action
+	 * 
+	 * @param evt
+	 */
+	public void editSetup(ActionEvent evt) {
+		if (this.application == null) {
+			return;
+		}
+
+		this.application.goToSetupServer();
 	}
 
 	/**

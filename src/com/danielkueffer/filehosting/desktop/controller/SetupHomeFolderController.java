@@ -14,6 +14,7 @@ import javafx.stage.DirectoryChooser;
 
 import com.danielkueffer.filehosting.desktop.Main;
 import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
+import com.danielkueffer.filehosting.desktop.enums.TabKeys;
 import com.danielkueffer.filehosting.desktop.service.PropertyService;
 
 /**
@@ -95,7 +96,7 @@ public class SetupHomeFolderController extends AnchorPane implements
 			return;
 		}
 
-		this.application.goToSettings();
+		this.application.goToSettings(TabKeys.USER);
 	}
 
 	/**
