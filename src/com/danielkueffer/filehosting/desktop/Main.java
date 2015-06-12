@@ -1,16 +1,30 @@
 package com.danielkueffer.filehosting.desktop;
 
+import java.awt.AWTException;
+import java.awt.Image;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+
+import javax.imageio.ImageIO;
 
 import com.danielkueffer.filehosting.desktop.controller.SettingsController;
 import com.danielkueffer.filehosting.desktop.controller.SetupAccountController;
@@ -69,6 +83,8 @@ public class Main extends Application {
 	private UserService userService;
 	private FileService fileService;
 
+	private ResourceBundle bundle;
+
 	/**
 	 * @param args
 	 */
@@ -81,6 +97,8 @@ public class Main extends Application {
 	 */
 	@Override
 	public void start(Stage primaryStage) {
+		this.primaryStage = primaryStage;
+
 		this.userClient = new UserClientImpl();
 		this.fileClient = new FileClientImpl();
 
@@ -92,7 +110,6 @@ public class Main extends Application {
 		// Set the propertyService in the network helper
 		NetworkHelper.setPropertyService(this.propertyService);
 
-		this.primaryStage = primaryStage;
 		this.primaryStage.setTitle(APP_NAME);
 		this.primaryStage.setMinWidth(MINIMUM_WINDOW_WIDTH);
 		this.primaryStage.setMaxHeight(MINIMUM_WINDOW_HEIGHT);
@@ -129,6 +146,14 @@ public class Main extends Application {
 
 			this.goToSettings(TabKeys.USER);
 		}
+		
+		// Load the resource bundle
+		this.bundle = ResourceBundle.getBundle(Main.PATH
+				+ "resources/i18n/messages", this.currentLocale);
+
+		// Create the tray icon
+		this.createTrayIcon();
+		Platform.setImplicitExit(false);
 
 		this.primaryStage.show();
 		this.primaryStage.centerOnScreen();
@@ -256,6 +281,118 @@ public class Main extends Application {
 		this.primaryStage.sizeToScene();
 
 		return (Initializable) loader.getController();
+	}
+
+	/**
+	 * Create the trayIcon to minimize the application to the system tray
+	 * 
+	 * @param stage
+	 */
+	public void createTrayIcon() {
+		if (SystemTray.isSupported()) {
+			// get the SystemTray instance
+			SystemTray tray = SystemTray.getSystemTray();
+
+			BufferedImage trayImage = null;
+
+			try {
+				trayImage = ImageIO.read(this
+						.getClass()
+						.getClassLoader()
+						.getResourceAsStream(
+								PATH + "resources/images/folder_sync.png"));
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+
+			int trayIconWidth = new TrayIcon(trayImage).getSize().width;
+
+			this.primaryStage
+					.setOnCloseRequest(new EventHandler<WindowEvent>() {
+						@Override
+						public void handle(WindowEvent t) {
+							primaryStage.hide();
+						}
+					});
+
+			// construct a TrayIcon
+			TrayIcon trayIcon = new TrayIcon(trayImage.getScaledInstance(
+					trayIconWidth, -1, Image.SCALE_SMOOTH), "Title",
+					this.getContextMenu());
+
+			// set the TrayIcon properties
+			trayIcon.addActionListener(this.showListener);
+
+			// add the tray image
+			try {
+				tray.add(trayIcon);
+			} catch (AWTException e) {
+				System.err.println(e);
+			}
+		}
+	}
+
+	/**
+	 * Get the context menu
+	 * 
+	 * @return
+	 */
+	private PopupMenu getContextMenu() {
+		PopupMenu popup = new PopupMenu();
+
+		MenuItem showItem = new MenuItem(this.bundle.getString("trayShow"));
+		showItem.addActionListener(this.showListener);
+		popup.add(showItem);
+
+		MenuItem closeItem = new MenuItem(this.bundle.getString("trayExit"));
+		closeItem.addActionListener(this.closeListener);
+		popup.add(closeItem);
+
+		return popup;
+	}
+
+	/**
+	 * The stage show actionListener
+	 */
+	private ActionListener showListener = new ActionListener() {
+		@Override
+		public void actionPerformed(java.awt.event.ActionEvent e) {
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					primaryStage.show();
+					primaryStage.centerOnScreen();
+				}
+			});
+		}
+	};
+
+	/**
+	 * The exit actionListener
+	 */
+	private ActionListener closeListener = new ActionListener() {
+		@Override
+		public void actionPerformed(java.awt.event.ActionEvent e) {
+			System.exit(0);
+		}
+	};
+
+	/**
+	 * Hide the stage
+	 * 
+	 * @param stage
+	 */
+	public void hide() {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				if (SystemTray.isSupported()) {
+					primaryStage.hide();
+				} else {
+					System.exit(0);
+				}
+			}
+		});
 	}
 
 	/**

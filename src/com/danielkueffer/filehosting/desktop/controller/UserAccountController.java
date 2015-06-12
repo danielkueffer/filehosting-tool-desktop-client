@@ -218,9 +218,6 @@ public class UserAccountController extends Parent implements Initializable {
 
 		this.usedDiskSpaceLabel.setText(this.bundle
 				.getString("settingsDiskSpaceUsed") + " " + usedStr);
-		
-		System.out.println("quota: " + diskQuotaBytes + " used: "
-				+ usedSpace + " percent: " + percent);
 	}
 
 	/**
@@ -246,7 +243,7 @@ public class UserAccountController extends Parent implements Initializable {
 			return;
 		}
 
-		System.out.println("close");
+		this.application.hide();
 	}
 
 	/**

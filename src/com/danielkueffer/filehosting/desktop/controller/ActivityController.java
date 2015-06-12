@@ -61,6 +61,6 @@ public class ActivityController extends Parent implements Initializable {
 			return;
 		}
 
-		System.out.println("close");
+		this.application.hide();
 	}
 }
