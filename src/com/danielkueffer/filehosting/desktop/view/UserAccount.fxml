@@ -55,13 +55,22 @@
         <Separator prefWidth="200.0" />
         <VBox prefHeight="200.0" prefWidth="100.0" VBox.margin="$x3">
           <children>
-            <Label text="Used disk space" textFill="#404040">
+            <Label id="usedDiskSpaceLabel" fx:id="usedDiskSpaceTitle" text="Used disk space" textFill="#404040">
               <VBox.margin>
                 <Insets bottom="10.0" fx:id="x2" />
               </VBox.margin>
             </Label>
-            <ProgressBar prefHeight="16.0" prefWidth="540.0" progress="0.09" VBox.margin="$x2" VBox.vgrow="ALWAYS" />
-            <Label prefWidth="540.0" text="Disk space value" VBox.margin="$x2" />
+            <ProgressBar fx:id="diskSpaceBar" prefHeight="16.0" prefWidth="540.0" progress="0.09" VBox.margin="$x2" VBox.vgrow="ALWAYS" />
+            <Label fx:id="quotaLabel" prefWidth="119.0" text="Quota:">
+              <VBox.margin>
+                <Insets bottom="5.0" />
+              </VBox.margin>
+            </Label>
+            <Label fx:id="usedDiskSpaceLabel" text="DiskSpaceUsed:">
+              <VBox.margin>
+                <Insets bottom="10.0" fx:id="x2" />
+              </VBox.margin>
+            </Label>
             <Separator prefWidth="200.0" />
           </children>
         </VBox>
