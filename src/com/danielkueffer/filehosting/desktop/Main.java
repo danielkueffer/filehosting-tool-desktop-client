@@ -7,6 +7,9 @@ import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,8 +28,6 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import javax.imageio.ImageIO;
-
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import com.danielkueffer.filehosting.desktop.controller.SettingsController;
 import com.danielkueffer.filehosting.desktop.controller.SetupAccountController;
@@ -322,8 +323,9 @@ public class Main extends Application {
 					trayIconWidth, -1, Image.SCALE_SMOOTH), "Title",
 					this.getContextMenu());
 
-			// set the TrayIcon properties
-			trayIcon.addActionListener(this.showListener);
+			// add a mouseListener to the trayIcon to show the application with
+			// a single click
+			trayIcon.addMouseListener(this.clickListener);
 
 			// add the tray image
 			try {
@@ -366,6 +368,23 @@ public class Main extends Application {
 					primaryStage.centerOnScreen();
 				}
 			});
+		}
+	};
+
+	/**
+	 * Stage show mouseListener on single click
+	 */
+	private MouseListener clickListener = new MouseAdapter() {
+		public void mouseClicked(MouseEvent e) {
+			if (e.getClickCount() == 1 && e.getButton() == MouseEvent.BUTTON1) {
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						primaryStage.show();
+						primaryStage.centerOnScreen();
+					}
+				});
+			}
 		}
 	};
 
