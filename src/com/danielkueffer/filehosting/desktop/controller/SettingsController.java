@@ -180,6 +180,7 @@ public class SettingsController extends AnchorPane implements Initializable {
 	 * ChangeListener to change the view of the tab
 	 */
 	private ChangeListener<Tab> tabListener = new ChangeListener<Tab>() {
+		@Override
 		public void changed(ObservableValue<? extends Tab> observable,
 				Tab oldValue, Tab newValue) {
 			if (newValue.getContent() == null) {

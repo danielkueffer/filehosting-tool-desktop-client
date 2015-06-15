@@ -26,6 +26,8 @@ import javafx.stage.WindowEvent;
 
 import javax.imageio.ImageIO;
 
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
+
 import com.danielkueffer.filehosting.desktop.controller.SettingsController;
 import com.danielkueffer.filehosting.desktop.controller.SetupAccountController;
 import com.danielkueffer.filehosting.desktop.controller.SetupHomeFolderController;

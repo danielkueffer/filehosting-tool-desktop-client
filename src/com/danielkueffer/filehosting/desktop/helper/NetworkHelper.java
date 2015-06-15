@@ -1,5 +1,11 @@
 package com.danielkueffer.filehosting.desktop.helper;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.file.Paths;
+
 import org.apache.http.HttpHost;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.params.ConnRoutePNames;
@@ -63,5 +69,40 @@ public class NetworkHelper {
 		}
 
 		return engine;
+	}
+
+	/**
+	 * Return the path of the folder as in the database entry of the file
+	 * 
+	 * @param fullPath
+	 * @param homeFolderPath
+	 * @return
+	 */
+	public static String getParentPath(String fullPath, String homeFolderPath) {
+
+		String parentPath = "";
+		try {
+			URL parentURL = Paths.get(fullPath).toUri().toURL();
+			URL homeFolderURL = Paths.get(homeFolderPath).toUri().toURL();
+
+			parentPath = parentURL.getPath().replace(homeFolderURL.getPath(),
+					"");
+
+			// Decode the URL
+			parentPath = URLDecoder.decode(parentPath, "UTF-8");
+
+			// Remove last slash of the string
+			if (parentPath.length() > 0
+					&& parentPath.charAt(parentPath.length() - 1) == '/') {
+				parentPath = parentPath.substring(0, parentPath.length() - 1);
+			}
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return parentPath;
 	}
 }

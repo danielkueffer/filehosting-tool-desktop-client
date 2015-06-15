@@ -10,11 +10,15 @@ import java.io.InputStream;
  * 
  */
 public interface FileClient {
-	boolean uploadFile(File file, String authToken);
-	
+	String uploadFile(String url, File file, String fileName, int parent,
+			String authToken);
+
+	String createFolder(String url, String folderName, int parent,
+			String authToken);
+
 	InputStream getFileByPath(String url, String authToken);
-	
+
 	String getFilesByUser(String url, String authToken);
-	
+
 	boolean deleteFile(String path, String authToken);
 }

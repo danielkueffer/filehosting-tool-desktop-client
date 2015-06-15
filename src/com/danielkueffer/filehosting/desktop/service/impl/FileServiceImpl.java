@@ -8,6 +8,8 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -15,6 +17,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
+import com.danielkueffer.filehosting.desktop.helper.NetworkHelper;
 import com.danielkueffer.filehosting.desktop.repository.client.FileClient;
 import com.danielkueffer.filehosting.desktop.service.FileService;
 import com.danielkueffer.filehosting.desktop.service.PropertyService;
@@ -30,10 +33,16 @@ public class FileServiceImpl implements FileService {
 
 	private static final String FILE_URL = "resource/file";
 	private static final String DOWNLOAD_URL = "resource/file/download";
+	private static final String ADD_FOLDER_URL = "resource/file/folder/add";
+	private static final String FILE_UPLOAD_URL = "resource/file/upload";
 
 	private FileClient fileClient;
 	private PropertyService propertyService;
 	private UserService userService;
+
+	private List<Path> filePaths;
+	private String homeFolder;
+	private JsonArray jsonFileArray;
 
 	public FileServiceImpl(FileClient fileClient,
 			PropertyService propertyService, UserService userService) {
@@ -47,18 +56,15 @@ public class FileServiceImpl implements FileService {
 	 */
 	@Override
 	public void startSynchronization() {
+		this.filePaths = new ArrayList<Path>();
+
 		// URL to the file resource
 		String fileUrl = this.propertyService
 				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
 				+ FILE_URL;
 
-		// URL to the download file resource
-		String downloadUrl = this.propertyService
-				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
-				+ DOWNLOAD_URL;
-
 		// The home folder
-		String homeFolder = this.propertyService
+		this.homeFolder = this.propertyService
 				.getProperty(PropertiesKeys.HOME_FOLDER.getValue());
 
 		// Get a list with the files of the current user
@@ -66,16 +72,32 @@ public class FileServiceImpl implements FileService {
 				this.userService.getAuthToken());
 
 		JsonReader reader = Json.createReader(new StringReader(userFiles));
-		JsonArray jArr = reader.readObject().getJsonArray("files");
+		this.jsonFileArray = reader.readObject().getJsonArray("files");
+
+		this.lookupFilesOnServer();
+		this.lookupFilesInHomeFolder();
+	}
+
+	/**
+	 * Get the files form the server and save them in the download folder if not
+	 * existing
+	 */
+	private void lookupFilesOnServer() {
+
+		// URL to the download file resource
+		String downloadUrl = this.propertyService
+				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
+				+ DOWNLOAD_URL;
 
 		// Loop over the files array
-		for (int i = 0; i < jArr.size(); i++) {
-			JsonObject jObj = jArr.getJsonObject(i);
+		for (int i = 0; i < this.jsonFileArray.size(); i++) {
+			JsonObject jObj = this.jsonFileArray.getJsonObject(i);
 			String filePath = jObj.getString("path");
 			String type = jObj.getString("type");
 
 			FileSystem fs = FileSystems.getDefault();
-			Path path = fs.getPath(homeFolder).resolve(filePath);
+			Path path = fs.getPath(this.homeFolder).resolve(filePath);
+			this.filePaths.add(path);
 
 			File file = path.toFile();
 
@@ -100,6 +122,89 @@ public class FileServiceImpl implements FileService {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Get the files from the home folder and check if they are existing on the
+	 * server. Upload a new file.
+	 * 
+	 * @param jArr
+	 */
+	private void lookupFilesInHomeFolder() {
+		// URL to add folder resource
+		String folderAddUrl = this.propertyService
+				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
+				+ ADD_FOLDER_URL;
+
+		// URL to upload a file
+		String fileUploadUrl = this.propertyService
+				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
+				+ FILE_UPLOAD_URL;
+
+		this.walkDir(this.homeFolder, folderAddUrl, fileUploadUrl);
+	}
+
+	/**
+	 * Walk trough the home folder recursively
+	 * 
+	 * @param path
+	 */
+	private void walkDir(String path, String folderAddUrl, String fileUploadUrl) {
+		File root = new File(path);
+		File[] list = root.listFiles();
+
+		if (list == null)
+			return;
+
+		for (File f : list) {
+			if (f.isDirectory()) {
+				// Directory, walk further
+				walkDir(f.getAbsolutePath(), folderAddUrl, fileUploadUrl);
+
+				// Check if the directory is existing on the server
+				if (!this.filePaths.contains(f.getAbsoluteFile().toPath())) {
+					String parentPath = NetworkHelper.getParentPath(
+							f.getParent(), this.homeFolder);
+
+					int parent = this.getParentIdFromPath(parentPath);
+
+					// Create the directory
+					this.fileClient.createFolder(folderAddUrl, f.getName(),
+							parent, this.userService.getAuthToken());
+				}
+			} else {
+				// Check if the file is existing on the server
+				if (!this.filePaths.contains(f.getAbsoluteFile().toPath())) {
+					String parentPath = NetworkHelper.getParentPath(
+							f.getParent(), this.homeFolder);
+
+					int parent = this.getParentIdFromPath(parentPath);
+
+					// Upload the file
+					this.fileClient.uploadFile(fileUploadUrl, f, f.getName(),
+							parent, this.userService.getAuthToken());
+				}
+			}
+		}
+	}
+
+	/**
+	 * Get the parent id from path
+	 * 
+	 * @param path
+	 * @return
+	 */
+	private int getParentIdFromPath(String path) {
+		for (int i = 0; i < this.jsonFileArray.size(); i++) {
+			JsonObject jObj = this.jsonFileArray.getJsonObject(i);
+			String filePath = jObj.getString("path");
+
+			if (filePath.equals(path)) {
+				return jObj.getInt("id");
+			}
+		}
+
+		return 0;
 	}
 
 	@Override
