@@ -146,7 +146,7 @@ public class Main extends Application {
 
 			this.goToSettings(TabKeys.USER);
 		}
-		
+
 		// Load the resource bundle
 		this.bundle = ResourceBundle.getBundle(Main.PATH
 				+ "resources/i18n/messages", this.currentLocale);
@@ -393,6 +393,13 @@ public class Main extends Application {
 				}
 			}
 		});
+	}
+
+	/**
+	 * Start synchronization
+	 */
+	public void startSync() {
+		this.fileService.startSynchronization();
 	}
 
 	/**

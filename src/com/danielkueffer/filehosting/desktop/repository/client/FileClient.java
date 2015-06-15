@@ -1,8 +1,7 @@
 package com.danielkueffer.filehosting.desktop.repository.client;
 
 import java.io.File;
-
-import com.danielkueffer.filehosting.desktop.repository.pojos.User;
+import java.io.InputStream;
 
 /**
  * The file client
@@ -13,9 +12,9 @@ import com.danielkueffer.filehosting.desktop.repository.pojos.User;
 public interface FileClient {
 	boolean uploadFile(File file, String authToken);
 	
-	String getFileByPath(String path, String authToken);
+	InputStream getFileByPath(String url, String authToken);
 	
-	String getFilesByUser(User currentUser, String authToken);
+	String getFilesByUser(String url, String authToken);
 	
 	boolean deleteFile(String path, String authToken);
 }

@@ -1,9 +1,15 @@
 package com.danielkueffer.filehosting.desktop.repository.client.impl;
 
 import java.io.File;
+import java.io.InputStream;
 
+import javax.ws.rs.core.Response;
+
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+
+import com.danielkueffer.filehosting.desktop.helper.NetworkHelper;
 import com.danielkueffer.filehosting.desktop.repository.client.FileClient;
-import com.danielkueffer.filehosting.desktop.repository.pojos.User;
 
 /**
  * File client implementation
@@ -19,16 +25,32 @@ public class FileClientImpl implements FileClient {
 		return false;
 	}
 
+	/**
+	 * Get a input stream of a file by path
+	 */
 	@Override
-	public String getFileByPath(String path, String authToken) {
-		// TODO Auto-generated method stub
-		return null;
+	public InputStream getFileByPath(String url, String authToken) {
+		ResteasyClient client = new ResteasyClientBuilder().httpEngine(
+				NetworkHelper.getEngine()).build();
+
+		Response res = client.target(url).request()
+				.header("auth_token", authToken).get();
+
+		return res.readEntity(InputStream.class);
 	}
 
+	/**
+	 * Get a file list of the current user
+	 */
 	@Override
-	public String getFilesByUser(User currentUser, String authToken) {
-		// TODO Auto-generated method stub
-		return null;
+	public String getFilesByUser(String url, String authToken) {
+		ResteasyClient client = new ResteasyClientBuilder().httpEngine(
+				NetworkHelper.getEngine()).build();
+
+		Response res = client.target(url).request()
+				.header("auth_token", authToken).get();
+
+		return res.readEntity(String.class);
 	}
 
 	@Override

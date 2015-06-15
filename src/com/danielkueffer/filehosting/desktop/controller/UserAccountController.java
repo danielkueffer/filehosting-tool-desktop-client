@@ -180,8 +180,8 @@ public class UserAccountController extends Parent implements Initializable {
 
 		// Used disk space in bytes
 		double usedDiskSpace = user.getUsedDiskSpace();
-		
-		double percent = (usedDiskSpace / diskQuotaBytes) * 100; 
+
+		double percent = (usedDiskSpace / diskQuotaBytes) * 100;
 
 		// Set progress bar value
 		this.diskSpaceBar.progressProperty().set(percent / 100);
@@ -205,7 +205,7 @@ public class UserAccountController extends Parent implements Initializable {
 		// Set the labels
 		this.quotaLabel.setText(this.bundle.getString("settingsQuota") + " "
 				+ user.getDiskQuota() + " GB");
-		
+
 		String usedStr = 0 + " KB";
 
 		long usedSpace = user.getUsedDiskSpace() / 1024;
@@ -256,6 +256,6 @@ public class UserAccountController extends Parent implements Initializable {
 			return;
 		}
 
-		System.out.println("sync");
+		this.application.startSync();
 	}
 }

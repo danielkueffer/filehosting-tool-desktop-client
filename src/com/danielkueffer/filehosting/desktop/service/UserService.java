@@ -20,4 +20,6 @@ public interface UserService {
 	File getProfileImage();
 
 	boolean checkServerStatus(String url);
+	
+	String getAuthToken();
 }

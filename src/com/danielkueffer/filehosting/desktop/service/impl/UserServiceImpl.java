@@ -159,6 +159,7 @@ public class UserServiceImpl implements UserService {
 	/**
 	 * @return the authToken
 	 */
+	@Override
 	public String getAuthToken() {
 		return authToken;
 	}
