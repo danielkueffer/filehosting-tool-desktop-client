@@ -8,6 +8,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,6 +95,9 @@ public class FileServiceImpl implements FileService {
 			JsonObject jObj = this.jsonFileArray.getJsonObject(i);
 			String filePath = jObj.getString("path");
 			String type = jObj.getString("type");
+			String lastModified = jObj.getString("lastModified");
+
+			Timestamp lastModifiedStamp = Timestamp.valueOf(lastModified);
 
 			FileSystem fs = FileSystems.getDefault();
 			Path path = fs.getPath(this.homeFolder).resolve(filePath);
@@ -115,11 +119,15 @@ public class FileServiceImpl implements FileService {
 						// Write the file
 						Files.copy(is, path);
 
+						// Set the file last modified
+						file.setLastModified(lastModifiedStamp.getTime());
+
 						is.close();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 				}
+
 			}
 		}
 	}
