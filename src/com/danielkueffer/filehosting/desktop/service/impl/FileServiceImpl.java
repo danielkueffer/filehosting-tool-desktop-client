@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -16,7 +17,10 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.json.stream.JsonGenerator;
+import javax.json.stream.JsonGeneratorFactory;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,6 +46,7 @@ public class FileServiceImpl implements FileService {
 	private static final String DOWNLOAD_URL = "resource/file/download";
 	private static final String ADD_FOLDER_URL = "resource/file/folder/add";
 	private static final String FILE_UPLOAD_URL = "resource/file/upload";
+	private static final String DELETED_FILES_URL = "resource/file/deleted";
 
 	private FileClient fileClient;
 	private PropertyService propertyService;
@@ -83,10 +88,82 @@ public class FileServiceImpl implements FileService {
 
 		_log.info("Starting synchronization");
 
+		this.deleteFilesOnDisk();
 		this.lookupFilesOnServer();
 		this.lookupFilesInHomeFolder();
-		
+
 		_log.info("Synchronization complete");
+	}
+
+	/**
+	 * Delete the files on disk which are deleted on the server
+	 */
+	private void deleteFilesOnDisk() {
+		_log.info("Check for deleted files on server");
+
+		String deletedFilesUrl = this.propertyService
+				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
+				+ DELETED_FILES_URL;
+
+		String deletedFiles = this.fileClient.getDeletedFilesByUser(
+				deletedFilesUrl, this.userService.getAuthToken());
+
+		JsonReader reader = Json.createReader(new StringReader(deletedFiles));
+		JsonArray deletedArray = reader.readArray();
+
+		FileSystem fs = FileSystems.getDefault();
+
+		// Create the JSON Array with the deleted files
+		JsonGeneratorFactory factory = Json.createGeneratorFactory(null);
+		StringWriter writer = new StringWriter();
+		JsonGenerator gen = factory.createGenerator(writer);
+
+		gen.writeStartArray();
+		
+		for (int i = 0; i < deletedArray.size(); i++) {
+			
+			JsonObject jObj = deletedArray.getJsonObject(i);
+			String filePath = jObj.getString("path");
+			Timestamp lastModified = Timestamp.valueOf(jObj
+					.getString("lastModified"));
+			int clientDeleted = jObj.getInt("clientDeleted");
+
+			// Check if it's not been deleted before
+			if (clientDeleted == 0) {
+				Path path = fs.getPath(this.homeFolder).resolve(filePath);
+
+				File file = path.toFile();
+
+				// Delete from disk
+				if (file.exists()) {
+					// Directory
+					if (file.isDirectory()) {
+						try {
+							FileUtils.deleteDirectory(file);
+							_log.info("Folder deleted: " + filePath);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					} else {
+						// File
+						if (file.lastModified() == lastModified.getTime()) {
+							file.delete();
+
+							_log.info("File deleted: " + filePath);
+						}
+					}
+
+					// Add the id to the JSON array
+					gen.writeStartObject().write("id", jObj.getInt("id"))
+							.writeEnd();
+				}
+			}
+		}
+
+		gen.writeEnd().flush();
+
+		this.fileClient.updateDeletedFiles(deletedFilesUrl, writer.toString(),
+				this.userService.getAuthToken());
 	}
 
 	/**
@@ -100,6 +177,8 @@ public class FileServiceImpl implements FileService {
 				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
 				+ DOWNLOAD_URL;
 
+		FileSystem fs = FileSystems.getDefault();
+
 		// Loop over the files array
 		for (int i = 0; i < this.jsonFileArray.size(); i++) {
 			JsonObject jObj = this.jsonFileArray.getJsonObject(i);
@@ -109,7 +188,6 @@ public class FileServiceImpl implements FileService {
 
 			Timestamp lastModifiedStamp = Timestamp.valueOf(lastModified);
 
-			FileSystem fs = FileSystems.getDefault();
 			Path path = fs.getPath(this.homeFolder).resolve(filePath);
 			this.filePaths.add(path);
 

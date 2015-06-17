@@ -21,4 +21,8 @@ public interface FileClient {
 	String getFilesByUser(String url, String authToken);
 
 	boolean deleteFile(String path, String authToken);
+	
+	String getDeletedFilesByUser(String url, String authToken);
+	
+	String updateDeletedFiles(String url, String json, String authToken);
 }

@@ -47,6 +47,9 @@ public class FileClientImpl implements FileClient {
 
 			mdo.addFormData("parent", new String(parent + ""),
 					MediaType.APPLICATION_FORM_URLENCODED_TYPE);
+
+			mdo.addFormData("last-modified", new String(file.lastModified()
+					+ ""), MediaType.APPLICATION_FORM_URLENCODED_TYPE);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -117,7 +120,41 @@ public class FileClientImpl implements FileClient {
 
 	@Override
 	public boolean deleteFile(String path, String authToken) {
-		// TODO Auto-generated method stub
 		return false;
+	}
+
+	/**
+	 * Get a list of the deleted files on the server
+	 */
+	@Override
+	public String getDeletedFilesByUser(String url, String authToken) {
+		ResteasyClient client = new ResteasyClientBuilder().httpEngine(
+				NetworkHelper.getEngine()).build();
+
+		Response res = client.target(url).request()
+				.header("auth_token", authToken).get();
+
+		return res.readEntity(String.class);
+	}
+
+	/**
+	 * Update the deleted files on server
+	 */
+	@Override
+	public String updateDeletedFiles(String url, String json, String authToken) {
+		ResteasyClient client = new ResteasyClientBuilder().httpEngine(
+				NetworkHelper.getEngine()).build();
+
+		Form form = new Form();
+		form.param("json", json);
+
+		Response res = client
+				.target(url)
+				.request(MediaType.APPLICATION_JSON)
+				.header("auth_token", authToken)
+				.post(Entity.entity(form,
+						MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+
+		return res.readEntity(String.class);
 	}
 }
