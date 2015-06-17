@@ -17,6 +17,9 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
 import com.danielkueffer.filehosting.desktop.helper.NetworkHelper;
 import com.danielkueffer.filehosting.desktop.repository.client.FileClient;
@@ -31,6 +34,9 @@ import com.danielkueffer.filehosting.desktop.service.UserService;
  * 
  */
 public class FileServiceImpl implements FileService {
+
+	private static final Logger _log = LogManager
+			.getLogger(FileServiceImpl.class.getName());
 
 	private static final String FILE_URL = "resource/file";
 	private static final String DOWNLOAD_URL = "resource/file/download";
@@ -75,8 +81,12 @@ public class FileServiceImpl implements FileService {
 		JsonReader reader = Json.createReader(new StringReader(userFiles));
 		this.jsonFileArray = reader.readObject().getJsonArray("files");
 
+		_log.info("Starting synchronization");
+
 		this.lookupFilesOnServer();
 		this.lookupFilesInHomeFolder();
+		
+		_log.info("Synchronization complete");
 	}
 
 	/**
@@ -123,6 +133,8 @@ public class FileServiceImpl implements FileService {
 						file.setLastModified(lastModifiedStamp.getTime());
 
 						is.close();
+
+						_log.info("File added: " + filePath);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -179,6 +191,8 @@ public class FileServiceImpl implements FileService {
 					// Create the directory
 					this.fileClient.createFolder(folderAddUrl, f.getName(),
 							parent, this.userService.getAuthToken());
+
+					_log.info("Folder uploaded: " + f.getName());
 				}
 			} else {
 				// Check if the file is existing on the server
@@ -191,6 +205,8 @@ public class FileServiceImpl implements FileService {
 					// Upload the file
 					this.fileClient.uploadFile(fileUploadUrl, f, f.getName(),
 							parent, this.userService.getAuthToken());
+
+					_log.info("File uploaded: " + f.getName());
 				}
 			}
 		}
