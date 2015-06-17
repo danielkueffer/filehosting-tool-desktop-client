@@ -141,12 +141,12 @@ public class FileClientImpl implements FileClient {
 	 * Update the deleted files on server
 	 */
 	@Override
-	public String updateDeletedFiles(String url, String json, String authToken) {
+	public String updateDeletedFiles(String url, String authToken) {
 		ResteasyClient client = new ResteasyClientBuilder().httpEngine(
 				NetworkHelper.getEngine()).build();
 
 		Form form = new Form();
-		form.param("json", json);
+		form.param("deleted", "true");
 
 		Response res = client
 				.target(url)

@@ -24,5 +24,5 @@ public interface FileClient {
 	
 	String getDeletedFilesByUser(String url, String authToken);
 	
-	String updateDeletedFiles(String url, String json, String authToken);
+	String updateDeletedFiles(String url, String authToken);
 }

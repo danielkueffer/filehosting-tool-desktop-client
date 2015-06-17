@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -17,8 +16,6 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import javax.json.stream.JsonGenerator;
-import javax.json.stream.JsonGeneratorFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
@@ -113,15 +110,8 @@ public class FileServiceImpl implements FileService {
 
 		FileSystem fs = FileSystems.getDefault();
 
-		// Create the JSON Array with the deleted files
-		JsonGeneratorFactory factory = Json.createGeneratorFactory(null);
-		StringWriter writer = new StringWriter();
-		JsonGenerator gen = factory.createGenerator(writer);
-
-		gen.writeStartArray();
-		
 		for (int i = 0; i < deletedArray.size(); i++) {
-			
+
 			JsonObject jObj = deletedArray.getJsonObject(i);
 			String filePath = jObj.getString("path");
 			Timestamp lastModified = Timestamp.valueOf(jObj
@@ -152,17 +142,11 @@ public class FileServiceImpl implements FileService {
 							_log.info("File deleted: " + filePath);
 						}
 					}
-
-					// Add the id to the JSON array
-					gen.writeStartObject().write("id", jObj.getInt("id"))
-							.writeEnd();
 				}
 			}
 		}
 
-		gen.writeEnd().flush();
-
-		this.fileClient.updateDeletedFiles(deletedFilesUrl, writer.toString(),
+		this.fileClient.updateDeletedFiles(deletedFilesUrl,
 				this.userService.getAuthToken());
 	}
 
