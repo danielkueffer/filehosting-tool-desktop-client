@@ -78,7 +78,7 @@ public class NetworkHelper {
 	 * @param homeFolderPath
 	 * @return
 	 */
-	public static String getParentPath(String fullPath, String homeFolderPath) {
+	public static String getRelativePath(String fullPath, String homeFolderPath) {
 
 		String parentPath = "";
 		try {

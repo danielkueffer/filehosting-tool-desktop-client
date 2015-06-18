@@ -61,7 +61,9 @@ public class FileServiceImpl implements FileService {
 	private UserService userService;
 
 	private List<Path> filePaths;
+	private List<String> deletedOnDiskPaths;
 	private String homeFolder;
+	private String fileUrl;
 	private JsonArray jsonFileArray;
 
 	public FileServiceImpl(FileClient fileClient,
@@ -77,9 +79,10 @@ public class FileServiceImpl implements FileService {
 	@Override
 	public void startSynchronization() {
 		this.filePaths = new ArrayList<Path>();
+		this.deletedOnDiskPaths = new ArrayList<String>();
 
 		// URL to the file resource
-		String fileUrl = this.propertyService
+		this.fileUrl = this.propertyService
 				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
 				+ FILE_URL;
 
@@ -91,18 +94,19 @@ public class FileServiceImpl implements FileService {
 
 		this.deleteFilesOnDisk();
 		this.deleteFilesOnServer();
-		
+
 		// Get a list with the files of the current user
 		String userFiles = this.fileClient.getFilesByUser(fileUrl,
 				this.userService.getAuthToken());
 
 		JsonReader reader = Json.createReader(new StringReader(userFiles));
 		this.jsonFileArray = reader.readObject().getJsonArray("files");
-		
+
 		this.lookupFilesOnServer();
 		this.lookupFilesInHomeFolder();
 
 		_log.info("Synchronization complete");
+		_log.info("--");
 	}
 
 	/**
@@ -155,6 +159,10 @@ public class FileServiceImpl implements FileService {
 							_log.info("File deleted: " + filePath);
 						}
 					}
+
+					// Add the path to a list to prevent it from deletion twice
+					// in the next step
+					this.deletedOnDiskPaths.add(path.toString());
 				}
 			}
 		}
@@ -168,7 +176,7 @@ public class FileServiceImpl implements FileService {
 	 */
 	private void deleteFilesOnServer() {
 		_log.info("Check for deleted files on disk");
-		
+
 		File cacheFile = new File(CACHE_PATH);
 
 		String fileDeleteUrl = this.propertyService
@@ -188,17 +196,21 @@ public class FileServiceImpl implements FileService {
 				while ((line = br.readLine()) != null) {
 					File file = new File(line);
 
-					// File is missing delete it on the server
-					if (!file.exists()) {
-						String filePath = NetworkHelper.getParentPath(line,
-								this.homeFolder);
+					// Check if the file was not previously deleted from server
+					if (!this.deletedOnDiskPaths.contains(line)) {
 
-						fileDeleteUrl = fileDeleteUrl + "/" + filePath;
+						// File is missing delete it on the server
+						if (!file.exists()) {
+							String filePath = NetworkHelper.getRelativePath(
+									line, this.homeFolder);
 
-						this.fileClient.deleteFile(fileDeleteUrl,
-								this.userService.getAuthToken());
+							fileDeleteUrl = fileDeleteUrl + "/" + filePath;
 
-						_log.info("File deleted on server: " + filePath);
+							this.fileClient.deleteFile(fileDeleteUrl,
+									this.userService.getAuthToken());
+
+							_log.info("File deleted on server: " + filePath);
+						}
 					}
 				}
 
@@ -217,11 +229,10 @@ public class FileServiceImpl implements FileService {
 	 * existing
 	 */
 	private void lookupFilesOnServer() {
-		
 		_log.info("Download file list from server");
 
 		// Create the cache file for the files
-		this.createCacheFile();
+		this.createCacheDir();
 
 		try {
 			PrintWriter writer = new PrintWriter(new BufferedWriter(
@@ -292,6 +303,8 @@ public class FileServiceImpl implements FileService {
 	 * 
 	 */
 	private void lookupFilesInHomeFolder() {
+		_log.info("Check for new files in the home folder");
+
 		// URL to add folder resource
 		String folderAddUrl = this.propertyService
 				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
@@ -331,42 +344,46 @@ public class FileServiceImpl implements FileService {
 		}
 
 		for (File f : list) {
-			if (f.isDirectory()) {
-				// Directory, walk further
-				walkDir(f.getAbsolutePath(), folderAddUrl, fileUploadUrl,
-						writer);
-
-				// Check if the directory is existing on the server
-				if (!this.filePaths.contains(f.getAbsoluteFile().toPath())) {
-					String parentPath = NetworkHelper.getParentPath(
-							f.getParent(), this.homeFolder);
-
-					int parent = this.getParentIdFromPath(parentPath);
-
-					// Create the directory
-					this.fileClient.createFolder(folderAddUrl, f.getName(),
-							parent, this.userService.getAuthToken());
-
-					writer.println(f.getAbsolutePath());
-
-					_log.info("Folder uploaded: " + f.getName());
-				}
-			} else {
+			if (!f.isDirectory()) {
 				// Check if the file is existing on the server
 				if (!this.filePaths.contains(f.getAbsoluteFile().toPath())) {
-					String parentPath = NetworkHelper.getParentPath(
+					String parentPath = NetworkHelper.getRelativePath(
 							f.getParent(), this.homeFolder);
 
+					// Get the parent id
 					int parent = this.getParentIdFromPath(parentPath);
 
 					// Upload the file
 					this.fileClient.uploadFile(fileUploadUrl, f, f.getName(),
 							parent, this.userService.getAuthToken());
 
+					// Write the path to the cache file
 					writer.println(f.getAbsolutePath());
 
-					_log.info("File uploaded: " + f.getName());
+					_log.info("File uploaded: " + f.getAbsoluteFile());
 				}
+			} else {
+				// Check if the directory is existing on the server
+				if (!this.filePaths.contains(f.getAbsoluteFile().toPath())) {
+					String parentPath = NetworkHelper.getRelativePath(
+							f.getParent(), this.homeFolder);
+
+					// Get the parent id
+					int parent = this.getParentIdFromPath(parentPath);
+
+					// Create the directory
+					this.fileClient.createFolder(folderAddUrl, f.getName(),
+							parent, this.userService.getAuthToken());
+
+					// Write the path to the cache file
+					writer.println(f.getAbsolutePath());
+
+					_log.info("Folder uploaded: " + f.getAbsolutePath());
+				}
+
+				// Directory, walk further
+				walkDir(f.getAbsolutePath(), folderAddUrl, fileUploadUrl,
+						writer);
 			}
 		}
 	}
@@ -378,8 +395,16 @@ public class FileServiceImpl implements FileService {
 	 * @return
 	 */
 	private int getParentIdFromPath(String path) {
-		for (int i = 0; i < this.jsonFileArray.size(); i++) {
-			JsonObject jObj = this.jsonFileArray.getJsonObject(i);
+
+		// Get a list with the files of the current user
+		String userFiles = this.fileClient.getFilesByUser(this.fileUrl,
+				this.userService.getAuthToken());
+
+		JsonReader reader = Json.createReader(new StringReader(userFiles));
+		JsonArray jArray = reader.readObject().getJsonArray("files");
+
+		for (int i = 0; i < jArray.size(); i++) {
+			JsonObject jObj = jArray.getJsonObject(i);
 			String filePath = jObj.getString("path");
 
 			if (filePath.equals(path)) {
@@ -391,23 +416,13 @@ public class FileServiceImpl implements FileService {
 	}
 
 	/**
-	 * Create the cache file if it's not existing
+	 * Create the cache directory if it's not existing
 	 */
-	private void createCacheFile() {
+	private void createCacheDir() {
 		// Check for the cache directory
 		File dir = new File(CACHE_DIR);
 		if (!dir.exists()) {
 			dir.mkdirs();
-		}
-
-		// Check for cache file
-		File cacheFile = new File(CACHE_PATH);
-		if (!cacheFile.exists()) {
-			try {
-				cacheFile.createNewFile();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 
