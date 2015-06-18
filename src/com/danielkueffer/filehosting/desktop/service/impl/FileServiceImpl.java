@@ -86,10 +86,10 @@ public class FileServiceImpl implements FileService {
 	 * file exits - check the file-cache.txt file in the desktop application for
 	 * missing files on disk - delete missing files on the server
 	 * 
-	 * Step 3. Download file list from the server - download new files from
-	 * server - if a file is already existing -> check last modified date and
-	 * download or upload the file - clear file-cache.txt file - write the files
-	 * to the file-cache.txt file in desktop application
+	 * Step 3. Download files to the client - download new files from server -
+	 * if a file is already existing -> check last modified date and download or
+	 * upload the file - clear file-cache.txt file - write the files to the
+	 * file-cache.txt file in desktop application
 	 * 
 	 * Step 4. Check for new files in the home folder - upload new files from
 	 * disk - write the files to file-cache.txt file in desktop application
@@ -128,7 +128,7 @@ public class FileServiceImpl implements FileService {
 		JsonReader reader = Json.createReader(new StringReader(userFiles));
 		this.jsonFileArray = reader.readObject().getJsonArray("files");
 
-		// Step 3 - download file list from the server
+		// Step 3 - download files to the client
 		this.lookupFilesOnServer();
 
 		// Step 4 - check for new files in the home folder
@@ -254,8 +254,8 @@ public class FileServiceImpl implements FileService {
 	}
 
 	/**
-	 * Download file list from the server. Download files which are not existing
-	 * on the client. Upload or download modified files
+	 * Download files which are not existing to the client. Upload or download
+	 * modified files
 	 */
 	private void lookupFilesOnServer() {
 
