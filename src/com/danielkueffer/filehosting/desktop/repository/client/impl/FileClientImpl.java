@@ -118,9 +118,18 @@ public class FileClientImpl implements FileClient {
 		return res.readEntity(String.class);
 	}
 
+	/**
+	 * Delete a file on the server
+	 */
 	@Override
-	public boolean deleteFile(String path, String authToken) {
-		return false;
+	public String deleteFile(String url, String authToken) {
+		ResteasyClient client = new ResteasyClientBuilder().httpEngine(
+				NetworkHelper.getEngine()).build();
+
+		Response res = client.target(url).request()
+				.header("auth_token", authToken).delete();
+
+		return res.readEntity(String.class);
 	}
 
 	/**
