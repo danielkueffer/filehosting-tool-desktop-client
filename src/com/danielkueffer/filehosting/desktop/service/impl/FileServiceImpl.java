@@ -64,6 +64,7 @@ public class FileServiceImpl implements FileService {
 	private List<String> deletedOnDiskPaths;
 	private String homeFolder;
 	private String fileUrl;
+	private String fileUploadUrl;
 	private JsonArray jsonFileArray;
 
 	public FileServiceImpl(FileClient fileClient,
@@ -75,6 +76,23 @@ public class FileServiceImpl implements FileService {
 
 	/**
 	 * Start the synchronization
+	 * 
+	 * Step 1. Check for deleted files on the server - check the files_deleted
+	 * table on the server for deleted files (user, clientDeleted = 0) - only
+	 * delete if the last modify date is same - set deleted files in the
+	 * files_deleted table as clientDeleted = 1
+	 * 
+	 * Step 2. Check for deleted files on disk - check if the file-cache.txt
+	 * file exits - check the file-cache.txt file in the desktop application for
+	 * missing files on disk - delete missing files on the server
+	 * 
+	 * Step 3. Download file list from the server - download new files from
+	 * server - if a file is already existing -> check last modified date and
+	 * download or upload the file - clear file-cache.txt file - write the files
+	 * to the file-cache.txt file in desktop application
+	 * 
+	 * Step 4. Check for new files in the home folder - upload new files from
+	 * disk - write the files to file-cache.txt file in desktop application
 	 */
 	@Override
 	public void startSynchronization() {
@@ -90,9 +108,17 @@ public class FileServiceImpl implements FileService {
 		this.homeFolder = this.propertyService
 				.getProperty(PropertiesKeys.HOME_FOLDER.getValue());
 
+		// URL to upload a file
+		this.fileUploadUrl = this.propertyService
+				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
+				+ FILE_UPLOAD_URL;
+
 		_log.info("Starting synchronization");
 
+		// Step 1 - check for deleted files on the server
 		this.deleteFilesOnDisk();
+
+		// Step 2 - check for deleted files on disk
 		this.deleteFilesOnServer();
 
 		// Get a list with the files of the current user
@@ -102,7 +128,10 @@ public class FileServiceImpl implements FileService {
 		JsonReader reader = Json.createReader(new StringReader(userFiles));
 		this.jsonFileArray = reader.readObject().getJsonArray("files");
 
+		// Step 3 - download file list from the server
 		this.lookupFilesOnServer();
+
+		// Step 4 - check for new files in the home folder
 		this.lookupFilesInHomeFolder();
 
 		_log.info("Synchronization complete");
@@ -110,10 +139,10 @@ public class FileServiceImpl implements FileService {
 	}
 
 	/**
-	 * Delete the files on the client which are deleted on the server
+	 * Check for deleted files on the server. Delete the files on the client
+	 * which are deleted on the server
 	 */
 	private void deleteFilesOnDisk() {
-		_log.info("Check for deleted files on server");
 
 		String deletedFilesUrl = this.propertyService
 				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
@@ -172,10 +201,10 @@ public class FileServiceImpl implements FileService {
 	}
 
 	/**
-	 * Delete files on the server which are deleted on the client
+	 * Check for deleted files on disk. Delete files on the server which are
+	 * deleted on the client
 	 */
 	private void deleteFilesOnServer() {
-		_log.info("Check for deleted files on disk");
 
 		File cacheFile = new File(CACHE_PATH);
 
@@ -225,11 +254,10 @@ public class FileServiceImpl implements FileService {
 	}
 
 	/**
-	 * Get the files form the server and save them in the download folder if not
-	 * existing
+	 * Download file list from the server. Download files which are not existing
+	 * on the client. Upload or download modified files
 	 */
 	private void lookupFilesOnServer() {
-		_log.info("Download file list from server");
 
 		// Create the cache file for the files
 		this.createCacheDir();
@@ -237,11 +265,6 @@ public class FileServiceImpl implements FileService {
 		try {
 			PrintWriter writer = new PrintWriter(new BufferedWriter(
 					new FileWriter(CACHE_PATH)));
-
-			// URL to the download file resource
-			String downloadUrl = this.propertyService
-					.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
-					+ DOWNLOAD_URL;
 
 			FileSystem fs = FileSystems.getDefault();
 
@@ -251,6 +274,7 @@ public class FileServiceImpl implements FileService {
 				String filePath = jObj.getString("path");
 				String type = jObj.getString("type");
 				String lastModified = jObj.getString("lastModified");
+				int parent = jObj.getInt("parent");
 
 				Timestamp lastModifiedStamp = Timestamp.valueOf(lastModified);
 
@@ -266,23 +290,41 @@ public class FileServiceImpl implements FileService {
 
 						_log.info("Folder added: " + filePath);
 					} else {
-						try {
-							// Get the file
-							InputStream is = this.fileClient.getFileByPath(
-									downloadUrl + "/" + filePath,
+
+						// Download the file
+						this.downloadFile(path, filePath);
+
+						// Set the file last modified
+						file.setLastModified(lastModifiedStamp.getTime());
+
+						_log.info("File added: " + filePath);
+					}
+				} else {
+
+					// Update a file if the last modified date has changed
+					if (!type.equals("folder")) {
+
+						// File on disk is newer
+						if (file.lastModified() > lastModifiedStamp.getTime()) {
+
+							// Upload the file
+							this.fileClient.uploadFile(fileUploadUrl, file,
+									file.getName(), parent,
 									this.userService.getAuthToken());
 
-							// Write the file
-							Files.copy(is, path);
+							_log.info("File updated on server:" + filePath);
+
+							// File on disk is older
+						} else if (file.lastModified() < lastModifiedStamp
+								.getTime()) {
+
+							// Download the file
+							this.downloadFile(path, filePath);
 
 							// Set the file last modified
 							file.setLastModified(lastModifiedStamp.getTime());
 
-							is.close();
-
-							_log.info("File added: " + filePath);
-						} catch (IOException e) {
-							e.printStackTrace();
+							_log.info("File updated on disk: " + filePath);
 						}
 					}
 				}
@@ -298,28 +340,20 @@ public class FileServiceImpl implements FileService {
 	}
 
 	/**
-	 * Get the files from the home folder and check if they are existing on the
-	 * server. Upload a new file.
-	 * 
+	 * Check for new files in the home folder. Upload new files to the server.
 	 */
 	private void lookupFilesInHomeFolder() {
-		_log.info("Check for new files in the home folder");
 
 		// URL to add folder resource
 		String folderAddUrl = this.propertyService
 				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
 				+ ADD_FOLDER_URL;
 
-		// URL to upload a file
-		String fileUploadUrl = this.propertyService
-				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
-				+ FILE_UPLOAD_URL;
-
 		try {
 			PrintWriter writer = new PrintWriter(new BufferedWriter(
 					new FileWriter(CACHE_PATH, true)));
 
-			this.walkDir(this.homeFolder, folderAddUrl, fileUploadUrl, writer);
+			this.walkDir(this.homeFolder, folderAddUrl, writer);
 
 			writer.close();
 
@@ -333,8 +367,7 @@ public class FileServiceImpl implements FileService {
 	 * 
 	 * @param path
 	 */
-	private void walkDir(String path, String folderAddUrl,
-			String fileUploadUrl, PrintWriter writer) {
+	private void walkDir(String path, String folderAddUrl, PrintWriter writer) {
 
 		File root = new File(path);
 		File[] list = root.listFiles();
@@ -382,9 +415,35 @@ public class FileServiceImpl implements FileService {
 				}
 
 				// Directory, walk further
-				walkDir(f.getAbsolutePath(), folderAddUrl, fileUploadUrl,
-						writer);
+				walkDir(f.getAbsolutePath(), folderAddUrl, writer);
 			}
+		}
+	}
+
+	/**
+	 * Download a file
+	 * 
+	 * @param path
+	 * @param filePath
+	 */
+	private void downloadFile(Path systemPath, String filePath) {
+
+		// URL to the download file resource
+		String downloadUrl = this.propertyService
+				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
+				+ DOWNLOAD_URL;
+
+		try {
+			// Get the file
+			InputStream is = this.fileClient.getFileByPath(downloadUrl + "/"
+					+ filePath, this.userService.getAuthToken());
+
+			// Write the file
+			Files.copy(is, systemPath);
+
+			is.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
