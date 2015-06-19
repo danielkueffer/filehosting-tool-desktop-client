@@ -7,9 +7,7 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -70,6 +68,7 @@ public class UserAccountController extends Parent implements Initializable {
 	private String action = "";
 
 	private boolean isSync = true;
+	private boolean started;
 
 	/**
 	 * Initialize the controller
@@ -164,23 +163,24 @@ public class UserAccountController extends Parent implements Initializable {
 						// start the synchronization
 						application.startSync();
 
-						Platform.runLater(new Runnable() {
-							@Override
-							public void run() {
+						started = true;
+					} else {
+						started = false;
+					}
+
+					// Set the sync button label
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							if (started) {
 								syncButton.setText(bundle
 										.getString("settingsStopSync"));
-							}
-						});
-					} else {
-						// Not logged in
-						Platform.runLater(new Runnable() {
-							@Override
-							public void run() {
+							} else {
 								syncButton.setText(bundle
 										.getString("settingsStartSync"));
 							}
-						});
-					}
+						}
+					});
 				}
 			}
 		};
