@@ -11,6 +11,7 @@ public enum PropertiesKeys {
 	SERVER_ADDRESS("serverAddress"),
 	USERNAME("username"),
 	PASSWORD("password"),
+	LANGUAGE("language"),
 	HOME_FOLDER("homeFolder"),
 	PROXY_ENABLED("proxyEnabled"),
 	PROXY_SERVER("proxyServer"),

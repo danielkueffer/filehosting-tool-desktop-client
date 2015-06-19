@@ -3,8 +3,10 @@ package com.danielkueffer.filehosting.desktop.controller;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -61,9 +63,9 @@ public class UserAccountController extends Parent implements Initializable {
 
 	private ResourceBundle bundle;
 	private Main application;
-	private SettingsController settingsController;
 	private UserService userService;
 	private PropertyService propertyService;
+	private String action = "";
 
 	/**
 	 * Initialize the controller
@@ -88,10 +90,10 @@ public class UserAccountController extends Parent implements Initializable {
 	 * @param application
 	 * @param settingsController
 	 */
-	public void setApp(Main application, SettingsController settingsController) {
+	public void setApp(Main application) {
 		this.application = application;
-		this.settingsController = settingsController;
-		this.setDiskProgress();
+
+		this.setProgressBarWidth();
 	}
 
 	/**
@@ -104,55 +106,29 @@ public class UserAccountController extends Parent implements Initializable {
 	}
 
 	/**
-	 * Set the property service
+	 * Set the property service and check the connection to the server
 	 * 
 	 * @param propertyService
 	 */
 	public void setPropertyService(PropertyService propertyService) {
 		this.propertyService = propertyService;
+	}
 
-		String serverAddress = this.propertyService
+	/**
+	 * Check the connection to the server
+	 */
+	public void checkConnection() {
+
+		final String serverAddress = this.propertyService
 				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue());
 
-		User user = this.application.getLoggedInUser();
+		this.setControlsDisabled(serverAddress);
 
-		// Set the connection label
-		if (serverAddress != null) {
-			// Connected
-			if (this.userService.checkServerStatus(serverAddress)) {
-				String username = "";
+		final String username = this.propertyService
+				.getProperty(PropertiesKeys.USERNAME.getValue());
 
-				if (user != null) {
-					username = user.getUsername();
-				}
-
-				StringBuilder sb = new StringBuilder();
-				sb.append(this.bundle.getString("settingsConnected"));
-				sb.append(" ");
-				sb.append(serverAddress);
-				sb.append(" ");
-				sb.append(this.bundle.getString("settingsAs"));
-				sb.append(" ");
-				sb.append(username);
-
-				this.connectionLabel.setText(sb.toString());
-
-				this.syncButton.setDisable(false);
-			} else {
-				// Not connected
-				StringBuilder sb = new StringBuilder();
-				sb.append(this.bundle.getString("settingsNotConnected") + " "
-						+ serverAddress);
-
-				this.connectionLabel.setText(sb.toString());
-				this.syncButton.setDisable(true);
-			}
-		} else {
-			this.connectionLabel.setText(this.bundle
-					.getString("settingsNoAddress"));
-
-			this.syncButton.setDisable(true);
-		}
+		final String password = this.propertyService
+				.getProperty(PropertiesKeys.PASSWORD.getValue());
 
 		String localFolder = this.propertyService
 				.getProperty(PropertiesKeys.HOME_FOLDER.getValue());
@@ -166,10 +142,87 @@ public class UserAccountController extends Parent implements Initializable {
 					.getString("settingsLocalFolderEmpty"));
 		}
 
+		// Create a task to run the connection check loop
+		Task<Object> task = new Task<Object>() {
+			@Override
+			protected Object call() throws Exception {
+				while (true) {
+					connectionLoop(serverAddress, username, password);
+				}
+			}
+		};
+
+		// Create a thread with the task
+		Thread connectionThread = new Thread(task);
+		connectionThread.start();
 	}
 
 	/**
-	 * Set the progress bar
+	 * Loop to test the connection and to login the user
+	 * 
+	 * @param serverAddress
+	 * @param username
+	 * @param password
+	 */
+	private void connectionLoop(final String serverAddress,
+			final String username, String password) {
+
+		// Check if the server address is set
+		if (serverAddress != null) {
+
+			// Check connection
+			if (this.userService.checkServerStatus(serverAddress)) {
+
+				// Check if not logged in
+				if (this.application.getLoggedInUser() == null) {
+
+					// Login
+					boolean login = this.application.login(username, password);
+
+					if (login) {
+						// Login successful, set the current user
+						User currentUser = this.userService.getUser();
+						this.application.setLoggedInUser(currentUser);
+
+						action = "enableControls";
+					} else {
+						// Login failed
+						action = "disableControls";
+					}
+				}
+			} else {
+				// No connection
+				action = "disableControls";
+
+				// Logout the user
+				this.application.setLoggedInUser(null);
+			}
+		} else {
+			// No server address, logout the user
+			this.application.setLoggedInUser(null);
+		}
+
+		// Perform UI changes on the JavaFX thread
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				if (action.equals("enableControls")) {
+					setControlsEnabled(serverAddress, username);
+					setDiskProgress();
+				} else if (action.equals("disableControls")) {
+					setControlsDisabled(serverAddress);
+				} else {
+					connectionLabel.setText(bundle
+							.getString("settingsNoAddress"));
+
+					syncButton.setDisable(true);
+				}
+			}
+		});
+	}
+
+	/**
+	 * Set the progress bar value
 	 */
 	private void setDiskProgress() {
 		User user = this.application.getLoggedInUser();
@@ -185,22 +238,6 @@ public class UserAccountController extends Parent implements Initializable {
 
 		// Set progress bar value
 		this.diskSpaceBar.progressProperty().set(percent / 100);
-
-		// Set progress bar width
-		Scene scene = this.application.getPrimaryStage().getScene();
-		double width = scene.getWidth();
-		this.diskSpaceBar.setPrefWidth(width);
-
-		// Set the progress bar with on window resize
-		scene.widthProperty().addListener(new ChangeListener<Number>() {
-
-			@Override
-			public void changed(ObservableValue<? extends Number> ov,
-					Number oldVal, Number newVal) {
-				diskSpaceBar.setPrefWidth(newVal.doubleValue());
-			}
-
-		});
 
 		// Set the labels
 		this.quotaLabel.setText(this.bundle.getString("settingsQuota") + " "
@@ -218,6 +255,64 @@ public class UserAccountController extends Parent implements Initializable {
 
 		this.usedDiskSpaceLabel.setText(this.bundle
 				.getString("settingsDiskSpaceUsed") + " " + usedStr);
+	}
+
+	/**
+	 * Set the width of the progress bar
+	 */
+	private void setProgressBarWidth() {
+		Scene scene = this.application.getPrimaryStage().getScene();
+		double width = scene.getWidth();
+		this.diskSpaceBar.setPrefWidth(width);
+
+		// Set the progress bar with on window resize
+		scene.widthProperty().addListener(new ChangeListener<Number>() {
+
+			@Override
+			public void changed(ObservableValue<? extends Number> ov,
+					Number oldVal, Number newVal) {
+				diskSpaceBar.setPrefWidth(newVal.doubleValue());
+			}
+
+		});
+	}
+
+	/**
+	 * Set the controls as disabled if not connected with the server
+	 * 
+	 * @param serverAddress
+	 */
+	private void setControlsDisabled(String serverAddress) {
+		this.connectionLabel.setText(this.bundle
+				.getString("settingsNotConnected") + " " + serverAddress);
+
+		this.quotaLabel.setText(this.bundle.getString("settingsQuota"));
+		this.usedDiskSpaceLabel.setText(this.bundle
+				.getString("settingsDiskSpaceUsed"));
+		this.diskSpaceBar.progressProperty().set(0);
+
+		this.syncButton.setDisable(true);
+	}
+
+	/**
+	 * Set the controls enabled and connected
+	 * 
+	 * @param serverAddress
+	 * @param username
+	 */
+	private void setControlsEnabled(String serverAddress, String username) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.bundle.getString("settingsConnected"));
+		sb.append(" ");
+		sb.append(serverAddress);
+		sb.append(" ");
+		sb.append(this.bundle.getString("settingsAs"));
+		sb.append(" ");
+		sb.append(username);
+
+		this.connectionLabel.setText(sb.toString());
+
+		this.syncButton.setDisable(false);
 	}
 
 	/**

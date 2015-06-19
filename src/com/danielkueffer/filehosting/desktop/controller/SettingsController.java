@@ -99,9 +99,10 @@ public class SettingsController extends AnchorPane implements Initializable {
 		try {
 			UserAccountController userAccountController = (UserAccountController) this
 					.replaceTabContent("view/UserAccount.fxml", tab);
-			userAccountController.setApp(this.application, this);
+			userAccountController.setApp(this.application);
 			userAccountController.setUserService(this.userService);
 			userAccountController.setPropertyService(this.propertyService);
+			userAccountController.checkConnection();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

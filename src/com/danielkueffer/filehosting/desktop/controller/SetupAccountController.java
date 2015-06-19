@@ -142,11 +142,15 @@ public class SetupAccountController extends AnchorPane implements Initializable 
 					PropertiesKeys.USERNAME.getValue(), username);
 			this.propertyService.saveProperty(
 					PropertiesKeys.PASSWORD.getValue(), password);
-			
+
 			// Set the current user
 			User currentUser = this.userService.getUser();
 			this.application.setLoggedInUser(currentUser);
-			
+
+			this.propertyService.saveProperty(
+					PropertiesKeys.LANGUAGE.getValue(),
+					currentUser.getLanguage());
+
 			// Set the language of the user
 			if (currentUser.getLanguage().equals("de")) {
 				this.application.setCurrentLocale(new Locale("de", "DE"));

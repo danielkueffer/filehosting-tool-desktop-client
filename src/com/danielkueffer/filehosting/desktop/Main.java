@@ -117,8 +117,6 @@ public class Main extends Application {
 		this.primaryStage.setMinWidth(MINIMUM_WINDOW_WIDTH);
 		this.primaryStage.setMaxHeight(MINIMUM_WINDOW_HEIGHT);
 
-		this.currentLocale = new Locale("de", "DE");
-
 		String serverAddress = this.propertyService
 				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue());
 
@@ -126,27 +124,29 @@ public class Main extends Application {
 				.getProperty(PropertiesKeys.USERNAME.getValue());
 		String password = this.propertyService
 				.getProperty(PropertiesKeys.PASSWORD.getValue());
+		String language = this.propertyService
+				.getProperty(PropertiesKeys.LANGUAGE.getValue());
 
-		boolean loginSuccess = false;
+		this.currentLocale = new Locale("de", "DE");
 
-		// Check for server connection first, then login
-		if (serverAddress != null && username != null && password != null) {
-			if (this.userService.checkServerStatus(serverAddress)) {
-				loginSuccess = this.userService.login(username, password);
+		// Set the language if present
+		if (language != null) {
+			if (language.equals("en")) {
+				this.currentLocale = new Locale("en", "EN");
 			}
 		}
 
+		boolean hasConfig = false;
+
+		// Check for server connection first, then login
+		if (serverAddress != null && username != null && password != null) {
+			hasConfig = true;
+		}
+
 		// Check if the user is logged in
-		if (!loginSuccess) {
+		if (!hasConfig) {
 			this.goToSetupServer();
 		} else {
-			this.loggedInUser = this.userService.getUser();
-
-			// Set the language of the logged in user
-			if (this.loggedInUser.getLanguage().equals("en")) {
-				this.currentLocale = new Locale("en", "EN");
-			}
-
 			this.goToSettings(TabKeys.USER);
 		}
 
@@ -421,6 +421,17 @@ public class Main extends Application {
 	 */
 	public void startSync() {
 		this.fileService.startSynchronization();
+	}
+
+	/**
+	 * Login to the rest service
+	 * 
+	 * @param username
+	 * @param password
+	 * @return
+	 */
+	public boolean login(String username, String password) {
+		return this.userService.login(username, password);
 	}
 
 	/**

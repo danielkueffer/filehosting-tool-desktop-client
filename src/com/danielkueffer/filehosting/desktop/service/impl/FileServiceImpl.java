@@ -113,8 +113,6 @@ public class FileServiceImpl implements FileService {
 				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
 				+ FILE_UPLOAD_URL;
 
-		_log.info("Starting synchronization");
-
 		// Step 1 - check for deleted files on the server
 		this.deleteFilesOnDisk();
 
@@ -133,9 +131,6 @@ public class FileServiceImpl implements FileService {
 
 		// Step 4 - check for new files in the home folder
 		this.lookupFilesInHomeFolder();
-
-		_log.info("Synchronization complete");
-		_log.info("--");
 	}
 
 	/**
