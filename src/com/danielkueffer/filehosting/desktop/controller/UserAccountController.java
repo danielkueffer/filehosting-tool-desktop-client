@@ -7,7 +7,9 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -67,6 +69,8 @@ public class UserAccountController extends Parent implements Initializable {
 	private PropertyService propertyService;
 	private String action = "";
 
+	private boolean isSync = true;
+
 	/**
 	 * Initialize the controller
 	 */
@@ -82,6 +86,8 @@ public class UserAccountController extends Parent implements Initializable {
 				.getString("settingsUsedDiskSpace"));
 
 		this.closeButton.setText(this.bundle.getString("settingsClose"));
+
+		this.syncButton.setText(this.bundle.getString("settingsStartSync"));
 	}
 
 	/**
@@ -143,11 +149,38 @@ public class UserAccountController extends Parent implements Initializable {
 		}
 
 		// Create a task to run the connection check loop
-		Task<Object> task = new Task<Object>() {
+		final Task<Object> task = new Task<Object>() {
 			@Override
 			protected Object call() throws Exception {
 				while (true) {
-					connectionLoop(serverAddress, username, password);
+
+					// Check connection and login the user
+					boolean loggedIn = connectionLoop(serverAddress, username,
+							password);
+
+					// User is logged in
+					if (loggedIn && isSync) {
+
+						// start the synchronization
+						application.startSync();
+
+						Platform.runLater(new Runnable() {
+							@Override
+							public void run() {
+								syncButton.setText(bundle
+										.getString("settingsStopSync"));
+							}
+						});
+					} else {
+						// Not logged in
+						Platform.runLater(new Runnable() {
+							@Override
+							public void run() {
+								syncButton.setText(bundle
+										.getString("settingsStartSync"));
+							}
+						});
+					}
 				}
 			}
 		};
@@ -164,8 +197,10 @@ public class UserAccountController extends Parent implements Initializable {
 	 * @param username
 	 * @param password
 	 */
-	private void connectionLoop(final String serverAddress,
+	private boolean connectionLoop(final String serverAddress,
 			final String username, String password) {
+
+		boolean loggedIn = false;
 
 		// Check if the server address is set
 		if (serverAddress != null) {
@@ -185,10 +220,14 @@ public class UserAccountController extends Parent implements Initializable {
 						this.application.setLoggedInUser(currentUser);
 
 						action = "enableControls";
+
+						loggedIn = true;
 					} else {
 						// Login failed
 						action = "disableControls";
 					}
+				} else {
+					loggedIn = true;
 				}
 			} else {
 				// No connection
@@ -219,6 +258,8 @@ public class UserAccountController extends Parent implements Initializable {
 				}
 			}
 		});
+
+		return loggedIn;
 	}
 
 	/**
@@ -351,6 +392,12 @@ public class UserAccountController extends Parent implements Initializable {
 			return;
 		}
 
-		this.application.startSync();
+		// Set the synchronization flag
+		if (this.isSync) {
+			this.isSync = false;
+		} else {
+			this.isSync = true;
+		}
+
 	}
 }
