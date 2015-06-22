@@ -60,7 +60,7 @@
                 <Insets bottom="10.0" fx:id="x2" />
               </VBox.margin>
             </Label>
-            <ProgressBar fx:id="diskSpaceBar" prefHeight="16.0" prefWidth="540.0" progress="0.09" VBox.margin="$x2" VBox.vgrow="ALWAYS" />
+            <ProgressBar fx:id="diskSpaceBar" prefHeight="16.0" prefWidth="540.0" progress="0.0" VBox.margin="$x2" VBox.vgrow="ALWAYS" />
             <Label fx:id="quotaLabel" prefWidth="119.0" text="Quota:">
               <VBox.margin>
                 <Insets bottom="5.0" />

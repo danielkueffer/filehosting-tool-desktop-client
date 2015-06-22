@@ -3,10 +3,8 @@ package com.danielkueffer.filehosting.desktop.controller;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -18,10 +16,8 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 
 import com.danielkueffer.filehosting.desktop.Main;
-import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
 import com.danielkueffer.filehosting.desktop.repository.pojos.User;
 import com.danielkueffer.filehosting.desktop.service.PropertyService;
-import com.danielkueffer.filehosting.desktop.service.UserService;
 
 /**
  * The user account controller
@@ -63,12 +59,7 @@ public class UserAccountController extends Parent implements Initializable {
 
 	private ResourceBundle bundle;
 	private Main application;
-	private UserService userService;
 	private PropertyService propertyService;
-	private String action = "";
-
-	private boolean isSync = true;
-	private boolean started;
 
 	/**
 	 * Initialize the controller
@@ -102,15 +93,6 @@ public class UserAccountController extends Parent implements Initializable {
 	}
 
 	/**
-	 * Set the user service
-	 * 
-	 * @param userService
-	 */
-	public void setUserService(UserService userService) {
-		this.userService = userService;
-	}
-
-	/**
 	 * Set the property service and check the connection to the server
 	 * 
 	 * @param propertyService
@@ -120,152 +102,9 @@ public class UserAccountController extends Parent implements Initializable {
 	}
 
 	/**
-	 * Check the connection to the server
-	 */
-	public void checkConnection() {
-
-		final String serverAddress = this.propertyService
-				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue());
-
-		this.setControlsDisabled(serverAddress);
-
-		final String username = this.propertyService
-				.getProperty(PropertiesKeys.USERNAME.getValue());
-
-		final String password = this.propertyService
-				.getProperty(PropertiesKeys.PASSWORD.getValue());
-
-		String localFolder = this.propertyService
-				.getProperty(PropertiesKeys.HOME_FOLDER.getValue());
-
-		// Set the local folder
-		if (localFolder != null) {
-			this.localFolderLabel.setText(this.bundle
-					.getString("setupLocalFolder") + ": " + localFolder);
-		} else {
-			this.localFolderLabel.setText(this.bundle
-					.getString("settingsLocalFolderEmpty"));
-		}
-
-		// Create a task to run the connection check loop
-		final Task<Object> task = new Task<Object>() {
-			@Override
-			protected Object call() throws Exception {
-				while (true) {
-
-					// Check connection and login the user
-					boolean loggedIn = connectionLoop(serverAddress, username,
-							password);
-
-					// User is logged in
-					if (loggedIn && isSync) {
-
-						// start the synchronization
-						application.startSync();
-
-						started = true;
-					} else {
-						started = false;
-					}
-
-					// Set the sync button label
-					Platform.runLater(new Runnable() {
-						@Override
-						public void run() {
-							if (started) {
-								syncButton.setText(bundle
-										.getString("settingsStopSync"));
-							} else {
-								syncButton.setText(bundle
-										.getString("settingsStartSync"));
-							}
-						}
-					});
-				}
-			}
-		};
-
-		// Create a thread with the task
-		Thread connectionThread = new Thread(task);
-		connectionThread.start();
-	}
-
-	/**
-	 * Loop to test the connection and to login the user
-	 * 
-	 * @param serverAddress
-	 * @param username
-	 * @param password
-	 */
-	private boolean connectionLoop(final String serverAddress,
-			final String username, String password) {
-
-		boolean loggedIn = false;
-
-		// Check if the server address is set
-		if (serverAddress != null) {
-
-			// Check connection
-			if (this.userService.checkServerStatus(serverAddress)) {
-
-				// Check if not logged in
-				if (this.application.getLoggedInUser() == null) {
-
-					// Login
-					boolean login = this.application.login(username, password);
-
-					if (login) {
-						// Login successful, set the current user
-						User currentUser = this.userService.getUser();
-						this.application.setLoggedInUser(currentUser);
-
-						action = "enableControls";
-
-						loggedIn = true;
-					} else {
-						// Login failed
-						action = "disableControls";
-					}
-				} else {
-					loggedIn = true;
-				}
-			} else {
-				// No connection
-				action = "disableControls";
-
-				// Logout the user
-				this.application.setLoggedInUser(null);
-			}
-		} else {
-			// No server address, logout the user
-			this.application.setLoggedInUser(null);
-		}
-
-		// Perform UI changes on the JavaFX thread
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
-				if (action.equals("enableControls")) {
-					setControlsEnabled(serverAddress, username);
-					setDiskProgress();
-				} else if (action.equals("disableControls")) {
-					setControlsDisabled(serverAddress);
-				} else {
-					connectionLabel.setText(bundle
-							.getString("settingsNoAddress"));
-
-					syncButton.setDisable(true);
-				}
-			}
-		});
-
-		return loggedIn;
-	}
-
-	/**
 	 * Set the progress bar value
 	 */
-	private void setDiskProgress() {
+	public void setDiskProgress() {
 		User user = this.application.getLoggedInUser();
 
 		// Disk quota in GB
@@ -323,7 +162,7 @@ public class UserAccountController extends Parent implements Initializable {
 	 * 
 	 * @param serverAddress
 	 */
-	private void setControlsDisabled(String serverAddress) {
+	public void setControlsDisabled(String serverAddress) {
 		this.connectionLabel.setText(this.bundle
 				.getString("settingsNotConnected") + " " + serverAddress);
 
@@ -341,7 +180,7 @@ public class UserAccountController extends Parent implements Initializable {
 	 * @param serverAddress
 	 * @param username
 	 */
-	private void setControlsEnabled(String serverAddress, String username) {
+	public void setControlsEnabled(String serverAddress, String username) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.bundle.getString("settingsConnected"));
 		sb.append(" ");
@@ -393,11 +232,25 @@ public class UserAccountController extends Parent implements Initializable {
 		}
 
 		// Set the synchronization flag
-		if (this.isSync) {
-			this.isSync = false;
+		if (this.application.isSync()) {
+			this.application.setSync(false);
 		} else {
-			this.isSync = true;
+			this.application.setSync(true);
 		}
 
+	}
+
+	/**
+	 * @return the syncButton
+	 */
+	public Button getSyncButton() {
+		return syncButton;
+	}
+
+	/**
+	 * @return the connectionLabel
+	 */
+	public TextArea getConnectionLabel() {
+		return connectionLabel;
 	}
 }

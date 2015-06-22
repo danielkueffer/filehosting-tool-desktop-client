@@ -73,15 +73,6 @@ public class SettingsController extends AnchorPane implements Initializable {
 	}
 
 	/**
-	 * Set the user service
-	 * 
-	 * @param userService
-	 */
-	public void setUserService(UserService userService) {
-		this.userService = userService;
-	}
-
-	/**
 	 * Set the property service
 	 * 
 	 * @param propertyService
@@ -91,21 +82,32 @@ public class SettingsController extends AnchorPane implements Initializable {
 	}
 
 	/**
+	 * Set the userService
+	 * 
+	 * @param userService
+	 */
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
+
+	/**
 	 * Show user account view
 	 */
-	public void goToUserAccount() {
+	public UserAccountController goToUserAccount() {
 		Tab tab = this.settingsTabPane.getSelectionModel().getSelectedItem();
 
+		UserAccountController userAccountController = null;
+
 		try {
-			UserAccountController userAccountController = (UserAccountController) this
+			userAccountController = (UserAccountController) this
 					.replaceTabContent("view/UserAccount.fxml", tab);
 			userAccountController.setApp(this.application);
-			userAccountController.setUserService(this.userService);
 			userAccountController.setPropertyService(this.propertyService);
-			userAccountController.checkConnection();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		return userAccountController;
 	}
 
 	/**

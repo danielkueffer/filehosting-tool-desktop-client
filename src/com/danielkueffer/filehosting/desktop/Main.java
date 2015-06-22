@@ -18,6 +18,7 @@ import java.util.ResourceBundle;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -29,10 +30,14 @@ import javafx.stage.WindowEvent;
 
 import javax.imageio.ImageIO;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.danielkueffer.filehosting.desktop.controller.SettingsController;
 import com.danielkueffer.filehosting.desktop.controller.SetupAccountController;
 import com.danielkueffer.filehosting.desktop.controller.SetupHomeFolderController;
 import com.danielkueffer.filehosting.desktop.controller.SetupServerUrlController;
+import com.danielkueffer.filehosting.desktop.controller.UserAccountController;
 import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
 import com.danielkueffer.filehosting.desktop.enums.TabKeys;
 import com.danielkueffer.filehosting.desktop.helper.NetworkHelper;
@@ -56,6 +61,9 @@ import com.danielkueffer.filehosting.desktop.service.impl.UserServiceImpl;
  */
 public class Main extends Application {
 
+	private static final Logger _log = LogManager.getLogger(Main.class
+			.getName());
+
 	/* Name of the application */
 	public static final String APP_NAME = "Filehosting-Tool";
 
@@ -75,6 +83,13 @@ public class Main extends Application {
 	private static final double SETUP_WINDOW_HEIGHT = 400.0;
 
 	private boolean setupScene;
+	private boolean started;
+	private boolean isSync = true;
+
+	private String serverAddress;
+	private String username;
+	private String password;
+	private String action = "";
 
 	private Stage primaryStage;
 	private User loggedInUser;
@@ -87,6 +102,9 @@ public class Main extends Application {
 	private FileService fileService;
 
 	private ResourceBundle bundle;
+	private Thread connectionThread;
+
+	private UserAccountController userAccountController;
 
 	/**
 	 * @param args
@@ -142,6 +160,9 @@ public class Main extends Application {
 		if (serverAddress != null && username != null && password != null) {
 			hasConfig = true;
 		}
+
+		// Create the connection thread
+		this.connectionThread = new Thread(this.task);
 
 		// Check if the user is logged in
 		if (!hasConfig) {
@@ -221,6 +242,16 @@ public class Main extends Application {
 		try {
 			this.setupScene = false;
 
+			// Check connection
+			this.serverAddress = this.propertyService
+					.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue());
+
+			this.username = this.propertyService
+					.getProperty(PropertiesKeys.USERNAME.getValue());
+
+			this.password = this.propertyService
+					.getProperty(PropertiesKeys.PASSWORD.getValue());
+
 			SettingsController settingsController = (SettingsController) this
 					.replaceSceneContent("view/Settings.fxml");
 			settingsController.setApp(this);
@@ -230,7 +261,8 @@ public class Main extends Application {
 			// Select a tab
 			switch (view) {
 			case USER:
-				settingsController.goToUserAccount();
+				this.userAccountController = settingsController
+						.goToUserAccount();
 				break;
 			case ACTIVITIES:
 				settingsController.selectIndexTab(1);
@@ -238,6 +270,13 @@ public class Main extends Application {
 			case NETWORK:
 				settingsController.selectIndexTab(2);
 				break;
+			}
+
+			// Start the connection and sync thread if not started
+			if (!this.connectionThread.isAlive()) {
+				_log.info("In connection thread start");
+
+				this.connectionThread.start();
 			}
 
 		} catch (Exception e) {
@@ -435,6 +474,123 @@ public class Main extends Application {
 	}
 
 	/**
+	 * Create a task to run the connection check loop
+	 */
+	final Task<Object> task = new Task<Object>() {
+		@Override
+		protected Object call() throws Exception {
+			while (true) {
+
+				// Check connection and login the user
+				boolean loggedIn = connectionLoop(serverAddress, username,
+						password);
+
+				// User is logged in
+				if (loggedIn && isSync) {
+
+					// start the synchronization
+					startSync();
+
+					started = true;
+				} else {
+					started = false;
+				}
+
+				// Set the sync button label
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+
+						if (started) {
+							userAccountController.getSyncButton().setText(
+									bundle.getString("settingsStopSync"));
+						} else {
+							userAccountController.getSyncButton().setText(
+									bundle.getString("settingsStartSync"));
+						}
+
+					}
+				});
+			}
+		}
+	};
+
+	/**
+	 * Loop to test the connection and to login the user
+	 * 
+	 * @param serverAddress
+	 * @param username
+	 * @param password
+	 */
+	private boolean connectionLoop(final String serverAddress,
+			final String username, String password) {
+
+		boolean loggedIn = false;
+
+		// Check if the server address is set
+		if (serverAddress != null) {
+
+			// Check connection
+			if (this.userService.checkServerStatus(serverAddress)) {
+
+				// Check if not logged in
+				if (this.getLoggedInUser() == null) {
+
+					// Login
+					boolean login = this.login(username, password);
+
+					if (login) {
+						// Login successful, set the current user
+						User currentUser = this.userService.getUser();
+						this.setLoggedInUser(currentUser);
+
+						action = "enableControls";
+
+						loggedIn = true;
+					} else {
+						// Login failed
+						action = "disableControls";
+					}
+				} else {
+					loggedIn = true;
+				}
+			} else {
+				// No connection
+				action = "disableControls";
+
+				// Logout the user
+				this.setLoggedInUser(null);
+			}
+		} else {
+			// No server address, logout the user
+			this.setLoggedInUser(null);
+		}
+
+		// Perform UI changes on the JavaFX thread
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+
+				if (action.equals("enableControls")) {
+					userAccountController.setControlsEnabled(serverAddress,
+							username);
+					userAccountController.setDiskProgress();
+				} else if (action.equals("disableControls")) {
+					userAccountController.setControlsDisabled(serverAddress);
+				} else {
+					userAccountController.getConnectionLabel().setText(
+							bundle.getString("settingsNoAddress"));
+
+					userAccountController.getSyncButton().setDisable(true);
+				}
+
+			}
+		});
+
+		return loggedIn;
+	}
+
+	/**
 	 * @return the primaryStage
 	 */
 	public Stage getPrimaryStage() {
@@ -470,5 +626,20 @@ public class Main extends Application {
 	 */
 	public void setCurrentLocale(Locale currentLocale) {
 		this.currentLocale = currentLocale;
+	}
+
+	/**
+	 * @return the isSync
+	 */
+	public boolean isSync() {
+		return isSync;
+	}
+
+	/**
+	 * @param isSync
+	 *            the isSync to set
+	 */
+	public void setSync(boolean isSync) {
+		this.isSync = isSync;
 	}
 }
