@@ -20,6 +20,7 @@ import javafx.scene.control.ToggleGroup;
 
 import com.danielkueffer.filehosting.desktop.Main;
 import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
+import com.danielkueffer.filehosting.desktop.enums.TabKeys;
 import com.danielkueffer.filehosting.desktop.service.PropertyService;
 
 /**
@@ -169,7 +170,7 @@ public class NetworkController extends Parent implements Initializable {
 	public void setApp(Main application, SettingsController settingsController) {
 		this.application = application;
 		this.settingsController = settingsController;
-		
+
 		// Show the edit account button only if no user is logged in
 		if (this.application.getLoggedInUser() == null) {
 			this.editAccountButton.setVisible(true);
@@ -298,6 +299,8 @@ public class NetworkController extends Parent implements Initializable {
 					PropertiesKeys.PROXY_AUTHENTICATION.getValue(), proxyAuth
 							+ "");
 		}
+
+		this.application.goToSettings(TabKeys.USER);
 	}
 
 	/**

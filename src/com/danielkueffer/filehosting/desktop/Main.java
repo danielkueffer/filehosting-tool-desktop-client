@@ -500,7 +500,6 @@ public class Main extends Application {
 				Platform.runLater(new Runnable() {
 					@Override
 					public void run() {
-
 						if (started) {
 							userAccountController.getSyncButton().setText(
 									bundle.getString("settingsStopSync"));
@@ -508,7 +507,6 @@ public class Main extends Application {
 							userAccountController.getSyncButton().setText(
 									bundle.getString("settingsStartSync"));
 						}
-
 					}
 				});
 			}
@@ -570,7 +568,6 @@ public class Main extends Application {
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-
 				if (action.equals("enableControls")) {
 					userAccountController.setControlsEnabled(serverAddress,
 							username);
@@ -583,7 +580,6 @@ public class Main extends Application {
 
 					userAccountController.getSyncButton().setDisable(true);
 				}
-
 			}
 		});
 

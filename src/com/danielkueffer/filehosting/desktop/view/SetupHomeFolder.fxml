@@ -19,7 +19,7 @@
             <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0">
               <children>
                 <Button fx:id="backButton" mnemonicParsing="false" onAction="#goToBack" text="&lt; Back" />
-                <Button id="buttonNext" fx:id="connectButton" mnemonicParsing="false" onAction="#connect" text="Connect...">
+                <Button id="buttonNext" fx:id="connectButton" disable="true" mnemonicParsing="false" onAction="#connect" text="Connect...">
                   <HBox.margin>
                     <Insets left="15.0" right="25.0" />
                   </HBox.margin>
@@ -41,6 +41,7 @@
                 </ImageView>
                 <Label fx:id="localFolderLabel" prefWidth="112.0" text="Local Folder" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                 <Button fx:id="chooseFolderButton" mnemonicParsing="false" onAction="#chooseDirectory" prefWidth="273.0" text="Choose a local folder" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <Label fx:id="homeFolderErrorLabel" text="Error" textFill="#cc0000" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
               </children>
               <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="324.0" minWidth="10.0" prefWidth="141.0" />

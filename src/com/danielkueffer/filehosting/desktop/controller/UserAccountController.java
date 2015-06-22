@@ -16,6 +16,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 
 import com.danielkueffer.filehosting.desktop.Main;
+import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
 import com.danielkueffer.filehosting.desktop.repository.pojos.User;
 import com.danielkueffer.filehosting.desktop.service.PropertyService;
 
@@ -99,6 +100,18 @@ public class UserAccountController extends Parent implements Initializable {
 	 */
 	public void setPropertyService(PropertyService propertyService) {
 		this.propertyService = propertyService;
+
+		String localFolder = this.propertyService
+				.getProperty(PropertiesKeys.HOME_FOLDER.getValue());
+
+		// Set the local folder
+		if (localFolder != null) {
+			this.localFolderLabel.setText(this.bundle
+					.getString("setupLocalFolder") + ": " + localFolder);
+		} else {
+			this.localFolderLabel.setText(this.bundle
+					.getString("settingsLocalFolderEmpty"));
+		}
 	}
 
 	/**

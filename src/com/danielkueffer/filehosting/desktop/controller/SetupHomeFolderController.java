@@ -33,6 +33,9 @@ public class SetupHomeFolderController extends AnchorPane implements
 	private Label localFolderLabel;
 
 	@FXML
+	private Label homeFolderErrorLabel;
+
+	@FXML
 	private Button connectButton;
 
 	@FXML
@@ -84,6 +87,11 @@ public class SetupHomeFolderController extends AnchorPane implements
 		if (homeFolder != null) {
 			this.chooseFolderButton.setText(homeFolder);
 		}
+		
+		if (this.propertyService.getProperty(PropertiesKeys.HOME_FOLDER
+				.getValue()) != null) {
+			this.connectButton.setDisable(false);
+		}
 	}
 
 	/**
@@ -96,7 +104,14 @@ public class SetupHomeFolderController extends AnchorPane implements
 			return;
 		}
 
-		this.application.goToSettings(TabKeys.USER);
+		if (this.propertyService.getProperty(PropertiesKeys.HOME_FOLDER
+				.getValue()) != null) {
+			this.application.goToSettings(TabKeys.USER);
+		} else {
+			this.homeFolderErrorLabel.setText(this.bundle
+					.getString("setupChooseFolderError"));
+			this.homeFolderErrorLabel.setVisible(true);
+		}
 	}
 
 	/**
@@ -131,6 +146,9 @@ public class SetupHomeFolderController extends AnchorPane implements
 			this.chooseFolderButton.setText(path);
 			this.propertyService.saveProperty(
 					PropertiesKeys.HOME_FOLDER.getValue(), path);
+
+			this.homeFolderErrorLabel.setVisible(false);
+			this.connectButton.setDisable(false);
 		}
 	}
 }

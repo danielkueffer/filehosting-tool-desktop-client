@@ -143,9 +143,8 @@ public class SetupAccountController extends AnchorPane implements Initializable 
 			this.propertyService.saveProperty(
 					PropertiesKeys.PASSWORD.getValue(), password);
 
-			// Set the current user
+			// Set the language of the current user
 			User currentUser = this.userService.getUser();
-			this.application.setLoggedInUser(currentUser);
 
 			this.propertyService.saveProperty(
 					PropertiesKeys.LANGUAGE.getValue(),
