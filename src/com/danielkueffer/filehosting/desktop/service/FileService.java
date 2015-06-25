@@ -8,8 +8,6 @@ package com.danielkueffer.filehosting.desktop.service;
  */
 public interface FileService {
 	void startSynchronization();
-	
-	void stopSynchronization();
-	
+
 	String getActivities();
 }

@@ -481,12 +481,6 @@ public class FileServiceImpl implements FileService {
 	}
 
 	@Override
-	public void stopSynchronization() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public String getActivities() {
 		// TODO Auto-generated method stub
 		return null;

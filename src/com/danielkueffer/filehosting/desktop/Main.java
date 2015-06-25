@@ -509,6 +509,8 @@ public class Main extends Application {
 						}
 					}
 				});
+				
+				Thread.sleep(1000);
 			}
 		}
 	};
