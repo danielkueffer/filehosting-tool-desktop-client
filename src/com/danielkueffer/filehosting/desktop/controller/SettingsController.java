@@ -6,6 +6,7 @@ import java.util.ResourceBundle;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -16,8 +17,9 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
 
 import com.danielkueffer.filehosting.desktop.Main;
+import com.danielkueffer.filehosting.desktop.enums.TabKeys;
+import com.danielkueffer.filehosting.desktop.repository.pojos.Activity;
 import com.danielkueffer.filehosting.desktop.service.PropertyService;
-import com.danielkueffer.filehosting.desktop.service.UserService;
 
 /**
  * The settings controller
@@ -41,8 +43,8 @@ public class SettingsController extends AnchorPane implements Initializable {
 
 	private ResourceBundle bundle;
 	private Main application;
-	private UserService userService;
 	private PropertyService propertyService;
+	private ActivityController activityController;
 
 	/**
 	 * Initialize the controller
@@ -82,15 +84,6 @@ public class SettingsController extends AnchorPane implements Initializable {
 	}
 
 	/**
-	 * Set the userService
-	 * 
-	 * @param userService
-	 */
-	public void setUserService(UserService userService) {
-		this.userService = userService;
-	}
-
-	/**
 	 * Show user account view
 	 */
 	public UserAccountController goToUserAccount() {
@@ -113,16 +106,20 @@ public class SettingsController extends AnchorPane implements Initializable {
 	/**
 	 * Show activities view
 	 */
-	public void goToActivities() {
+	public ActivityController goToActivities() {
 		Tab tab = this.settingsTabPane.getSelectionModel().getSelectedItem();
 
+		ActivityController activityController = null;
+
 		try {
-			ActivityController activityController = (ActivityController) this
-					.replaceTabContent("view/Activity.fxml", tab);
-			activityController.setApp(this.application, this);
+			activityController = (ActivityController) this.replaceTabContent(
+					"view/Activity.fxml", tab);
+			activityController.setApp(this.application);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		return activityController;
 	}
 
 	/**
@@ -134,7 +131,7 @@ public class SettingsController extends AnchorPane implements Initializable {
 		try {
 			NetworkController networkController = (NetworkController) this
 					.replaceTabContent("view/Network.fxml", tab);
-			networkController.setApp(this.application, this);
+			networkController.setApp(this.application);
 			networkController.setPropertyService(this.propertyService);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -189,10 +186,12 @@ public class SettingsController extends AnchorPane implements Initializable {
 			if (newValue.getContent() == null) {
 				if (newValue.getText().equals(
 						bundle.getString("settingsUserAccount"))) {
-					goToUserAccount();
+
+					application.goToSettings(TabKeys.USER);
 				} else if (newValue.getText().equals(
 						bundle.getString("settingsActivities"))) {
-					goToActivities();
+
+					activityController = goToActivities();
 				} else {
 					goToNetwork();
 				}
@@ -201,4 +200,15 @@ public class SettingsController extends AnchorPane implements Initializable {
 			}
 		}
 	};
+
+	/**
+	 * Update the activity table
+	 * 
+	 * @param activityList
+	 */
+	public void updateActivityTable(ObservableList<Activity> activityList) {
+		if (activityController != null) {
+			this.activityController.updateActivityTable(activityList);
+		}
+	}
 }

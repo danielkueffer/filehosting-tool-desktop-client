@@ -18,6 +18,7 @@ import java.util.ResourceBundle;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -29,9 +30,6 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import javax.imageio.ImageIO;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.danielkueffer.filehosting.desktop.controller.SettingsController;
 import com.danielkueffer.filehosting.desktop.controller.SetupAccountController;
@@ -45,6 +43,7 @@ import com.danielkueffer.filehosting.desktop.repository.client.FileClient;
 import com.danielkueffer.filehosting.desktop.repository.client.UserClient;
 import com.danielkueffer.filehosting.desktop.repository.client.impl.FileClientImpl;
 import com.danielkueffer.filehosting.desktop.repository.client.impl.UserClientImpl;
+import com.danielkueffer.filehosting.desktop.repository.pojos.Activity;
 import com.danielkueffer.filehosting.desktop.repository.pojos.User;
 import com.danielkueffer.filehosting.desktop.service.FileService;
 import com.danielkueffer.filehosting.desktop.service.PropertyService;
@@ -60,9 +59,6 @@ import com.danielkueffer.filehosting.desktop.service.impl.UserServiceImpl;
  * 
  */
 public class Main extends Application {
-
-	private static final Logger _log = LogManager.getLogger(Main.class
-			.getName());
 
 	/* Name of the application */
 	public static final String APP_NAME = "Filehosting-Tool";
@@ -105,6 +101,7 @@ public class Main extends Application {
 	private Thread connectionThread;
 
 	private UserAccountController userAccountController;
+	private SettingsController settingsController;
 
 	/**
 	 * @param args
@@ -252,11 +249,10 @@ public class Main extends Application {
 			this.password = this.propertyService
 					.getProperty(PropertiesKeys.PASSWORD.getValue());
 
-			SettingsController settingsController = (SettingsController) this
+			this.settingsController = (SettingsController) this
 					.replaceSceneContent("view/Settings.fxml");
-			settingsController.setApp(this);
-			settingsController.setUserService(this.userService);
-			settingsController.setPropertyService(this.propertyService);
+			this.settingsController.setApp(this);
+			this.settingsController.setPropertyService(this.propertyService);
 
 			// Select a tab
 			switch (view) {
@@ -274,8 +270,6 @@ public class Main extends Application {
 
 			// Start the connection and sync thread if not started
 			if (!this.connectionThread.isAlive()) {
-				_log.info("In connection thread start");
-
 				this.connectionThread.start();
 			}
 
@@ -474,7 +468,8 @@ public class Main extends Application {
 	}
 
 	/**
-	 * Create a task to run the connection check loop
+	 * Create a task to run the connection check loop, the synchronization and
+	 * the activity display
 	 */
 	final Task<Object> task = new Task<Object>() {
 		@Override
@@ -501,15 +496,22 @@ public class Main extends Application {
 					@Override
 					public void run() {
 						if (started) {
+
+							// Update userAccount GUI
 							userAccountController.getSyncButton().setText(
 									bundle.getString("settingsStopSync"));
+
+							// Update activity table
+							settingsController
+									.updateActivityTable(getActivities());
+
 						} else {
 							userAccountController.getSyncButton().setText(
 									bundle.getString("settingsStartSync"));
 						}
 					}
 				});
-				
+
 				Thread.sleep(1000);
 			}
 		}
@@ -639,5 +641,14 @@ public class Main extends Application {
 	 */
 	public void setSync(boolean isSync) {
 		this.isSync = isSync;
+	}
+
+	/**
+	 * Get the activities
+	 * 
+	 * @return
+	 */
+	public ObservableList<Activity> getActivities() {
+		return this.fileService.getActivities();
 	}
 }

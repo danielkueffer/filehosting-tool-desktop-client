@@ -26,6 +26,17 @@
           </padding>
         </HBox>
         <Separator prefWidth="200.0" />
+        <TableView fx:id="activityTable" prefHeight="238.0" prefWidth="540.0">
+          <columns>
+            <TableColumn prefWidth="75.0" text="Date" fx:id="dateCol" />
+            <TableColumn prefWidth="75.0" text="File" fx:id="fileCol" />
+            <TableColumn prefWidth="75.0" text="Folder" fx:id="folderCol" />
+            <TableColumn prefWidth="75.0" text="Action" fx:id="actionCol" />
+          </columns>
+          <VBox.margin>
+            <Insets top="10.0" />
+          </VBox.margin>
+        </TableView>
         <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
           <children>
             <Button fx:id="closeButton" mnemonicParsing="false" onAction="#closeAction" text="Close" />

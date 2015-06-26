@@ -81,7 +81,6 @@ public class NetworkController extends Parent implements Initializable {
 
 	private ResourceBundle bundle;
 	private Main application;
-	private SettingsController settingsController;
 	private PropertyService propertyService;
 
 	/**
@@ -167,9 +166,8 @@ public class NetworkController extends Parent implements Initializable {
 	 * @param application
 	 * @param settingsController
 	 */
-	public void setApp(Main application, SettingsController settingsController) {
+	public void setApp(Main application) {
 		this.application = application;
-		this.settingsController = settingsController;
 
 		// Show the edit account button only if no user is logged in
 		if (this.application.getLoggedInUser() == null) {

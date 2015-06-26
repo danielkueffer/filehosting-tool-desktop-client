@@ -1,5 +1,9 @@
 package com.danielkueffer.filehosting.desktop.service;
 
+import com.danielkueffer.filehosting.desktop.repository.pojos.Activity;
+
+import javafx.collections.ObservableList;
+
 /**
  * The file service
  * 
@@ -9,5 +13,5 @@ package com.danielkueffer.filehosting.desktop.service;
 public interface FileService {
 	void startSynchronization();
 
-	String getActivities();
+	ObservableList<Activity> getActivities();
 }

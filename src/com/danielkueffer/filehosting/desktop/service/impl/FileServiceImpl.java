@@ -17,7 +17,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -31,6 +35,7 @@ import org.apache.logging.log4j.Logger;
 import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
 import com.danielkueffer.filehosting.desktop.helper.NetworkHelper;
 import com.danielkueffer.filehosting.desktop.repository.client.FileClient;
+import com.danielkueffer.filehosting.desktop.repository.pojos.Activity;
 import com.danielkueffer.filehosting.desktop.service.FileService;
 import com.danielkueffer.filehosting.desktop.service.PropertyService;
 import com.danielkueffer.filehosting.desktop.service.UserService;
@@ -62,6 +67,7 @@ public class FileServiceImpl implements FileService {
 
 	private List<Path> filePaths;
 	private List<String> deletedOnDiskPaths;
+	private List<Activity> activityList;
 	private String homeFolder;
 	private String fileUrl;
 	private String fileUploadUrl;
@@ -72,6 +78,7 @@ public class FileServiceImpl implements FileService {
 		this.fileClient = fileClient;
 		this.propertyService = propertyService;
 		this.userService = userService;
+		this.activityList = new ArrayList<Activity>();
 	}
 
 	/**
@@ -164,6 +171,7 @@ public class FileServiceImpl implements FileService {
 				Path path = fs.getPath(this.homeFolder).resolve(filePath);
 
 				File file = path.toFile();
+				String fileName = file.getName();
 
 				// Delete from disk
 				if (file.exists()) {
@@ -183,6 +191,15 @@ public class FileServiceImpl implements FileService {
 							_log.info("File deleted: " + filePath);
 						}
 					}
+
+					// Create activity
+					Activity activity = new Activity();
+					activity.setDate(new Date());
+					activity.setAction("delete");
+					activity.setFile(fileName);
+					activity.setHomeFolder(this.homeFolder);
+
+					this.activityList.add(activity);
 
 					// Add the path to a list to prevent it from deletion twice
 					// in the next step
@@ -232,6 +249,15 @@ public class FileServiceImpl implements FileService {
 
 							this.fileClient.deleteFile(fileDeleteUrl,
 									this.userService.getAuthToken());
+
+							// Create activity
+							Activity activity = new Activity();
+							activity.setDate(new Date());
+							activity.setAction("delete");
+							activity.setFile(filePath);
+							activity.setHomeFolder(this.homeFolder);
+
+							this.activityList.add(activity);
 
 							_log.info("File deleted on server: " + filePath);
 						}
@@ -294,6 +320,15 @@ public class FileServiceImpl implements FileService {
 
 						_log.info("File added: " + filePath);
 					}
+
+					// Create activity
+					Activity activity = new Activity();
+					activity.setDate(new Date());
+					activity.setAction("download");
+					activity.setFile(filePath);
+					activity.setHomeFolder(this.homeFolder);
+
+					this.activityList.add(activity);
 				} else {
 
 					// Update a file if the last modified date has changed
@@ -309,6 +344,15 @@ public class FileServiceImpl implements FileService {
 
 							_log.info("File updated on server:" + filePath);
 
+							// Create activity
+							Activity activity = new Activity();
+							activity.setDate(new Date());
+							activity.setAction("Updated");
+							activity.setFile(file.getName());
+							activity.setHomeFolder(this.homeFolder);
+
+							this.activityList.add(activity);
+
 							// File on disk is older
 						} else if (file.lastModified() < lastModifiedStamp
 								.getTime()) {
@@ -318,6 +362,15 @@ public class FileServiceImpl implements FileService {
 
 							// Set the file last modified
 							file.setLastModified(lastModifiedStamp.getTime());
+
+							// Create activity
+							Activity activity = new Activity();
+							activity.setDate(new Date());
+							activity.setAction("Updated");
+							activity.setFile(file.getName());
+							activity.setHomeFolder(this.homeFolder);
+
+							this.activityList.add(activity);
 
 							_log.info("File updated on disk: " + filePath);
 						}
@@ -388,6 +441,15 @@ public class FileServiceImpl implements FileService {
 					// Write the path to the cache file
 					writer.println(f.getAbsolutePath());
 
+					// Create activity
+					Activity activity = new Activity();
+					activity.setDate(new Date());
+					activity.setAction("upload");
+					activity.setFile(f.getName());
+					activity.setHomeFolder(this.homeFolder);
+
+					this.activityList.add(activity);
+
 					_log.info("File uploaded: " + f.getAbsoluteFile());
 				}
 			} else {
@@ -405,6 +467,15 @@ public class FileServiceImpl implements FileService {
 
 					// Write the path to the cache file
 					writer.println(f.getAbsolutePath());
+
+					// Create activity
+					Activity activity = new Activity();
+					activity.setDate(new Date());
+					activity.setAction("upload");
+					activity.setFile(f.getName());
+					activity.setHomeFolder(this.homeFolder);
+
+					this.activityList.add(activity);
 
 					_log.info("Folder uploaded: " + f.getAbsolutePath());
 				}
@@ -480,10 +551,11 @@ public class FileServiceImpl implements FileService {
 		}
 	}
 
+	/**
+	 * Get the activity list
+	 */
 	@Override
-	public String getActivities() {
-		// TODO Auto-generated method stub
-		return null;
+	public ObservableList<Activity> getActivities() {
+		return FXCollections.observableArrayList(this.activityList);
 	}
-
 }
