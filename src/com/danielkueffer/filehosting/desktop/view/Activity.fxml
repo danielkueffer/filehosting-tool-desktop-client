@@ -28,9 +28,9 @@
         <Separator prefWidth="200.0" />
         <TableView fx:id="activityTable" prefHeight="238.0" prefWidth="540.0">
           <columns>
-            <TableColumn prefWidth="75.0" text="Date" fx:id="dateCol" />
-            <TableColumn prefWidth="75.0" text="File" fx:id="fileCol" />
-            <TableColumn prefWidth="75.0" text="Folder" fx:id="folderCol" />
+            <TableColumn maxWidth="5000.0" minWidth="10.0" prefWidth="173.0" text="Date" fx:id="dateCol" />
+            <TableColumn maxWidth="5000.0" minWidth="10.0" prefWidth="126.0" text="File" fx:id="fileCol" />
+            <TableColumn maxWidth="5000.0" minWidth="10.0" prefWidth="164.0" text="Folder" fx:id="folderCol" />
             <TableColumn prefWidth="75.0" text="Action" fx:id="actionCol" />
           </columns>
           <VBox.margin>
