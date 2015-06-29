@@ -218,6 +218,7 @@ public class UserAccountController extends Parent implements Initializable {
 			return;
 		}
 
+		this.application.setSync(false);
 		this.application.goToSetupServer();
 	}
 

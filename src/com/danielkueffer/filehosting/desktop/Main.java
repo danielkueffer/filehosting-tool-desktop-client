@@ -1,7 +1,6 @@
 package com.danielkueffer.filehosting.desktop;
 
 import java.awt.AWTException;
-import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
@@ -18,13 +17,13 @@ import java.util.ResourceBundle;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -43,7 +42,6 @@ import com.danielkueffer.filehosting.desktop.repository.client.FileClient;
 import com.danielkueffer.filehosting.desktop.repository.client.UserClient;
 import com.danielkueffer.filehosting.desktop.repository.client.impl.FileClientImpl;
 import com.danielkueffer.filehosting.desktop.repository.client.impl.UserClientImpl;
-import com.danielkueffer.filehosting.desktop.repository.pojos.Activity;
 import com.danielkueffer.filehosting.desktop.repository.pojos.User;
 import com.danielkueffer.filehosting.desktop.service.FileService;
 import com.danielkueffer.filehosting.desktop.service.PropertyService;
@@ -65,6 +63,9 @@ public class Main extends Application {
 
 	/* Path */
 	public static final String PATH = "com/danielkueffer/filehosting/desktop/";
+
+	/* Window Icon Path */
+	public static final String WINDOW_ICON_PATH = "resources/images/folder_sync.png";
 
 	/* Minimum window size */
 	private static final double MINIMUM_WINDOW_WIDTH = 390.0;
@@ -176,6 +177,7 @@ public class Main extends Application {
 		this.createTrayIcon();
 		Platform.setImplicitExit(false);
 
+		this.primaryStage.getIcons().add(this.getWindowImage());
 		this.primaryStage.show();
 		this.primaryStage.centerOnScreen();
 	}
@@ -353,7 +355,7 @@ public class Main extends Application {
 
 			// construct a TrayIcon
 			TrayIcon trayIcon = new TrayIcon(trayImage.getScaledInstance(
-					trayIconWidth, -1, Image.SCALE_SMOOTH), "Title",
+					trayIconWidth, -1, java.awt.Image.SCALE_SMOOTH), "Title",
 					this.getContextMenu());
 
 			// add a mouseListener to the trayIcon to show the application with
@@ -427,6 +429,12 @@ public class Main extends Application {
 	private ActionListener closeListener = new ActionListener() {
 		@Override
 		public void actionPerformed(java.awt.event.ActionEvent e) {
+
+			// Logout if user is not null
+			if (getLoggedInUser() != null) {
+				userService.logout();
+			}
+
 			System.exit(0);
 		}
 	};
@@ -502,8 +510,8 @@ public class Main extends Application {
 									bundle.getString("settingsStopSync"));
 
 							// Update activity table
-							settingsController
-									.updateActivityTable(getActivities());
+							settingsController.updateActivityTable(fileService
+									.getActivities());
 
 						} else {
 							userAccountController.getSyncButton().setText(
@@ -555,6 +563,7 @@ public class Main extends Application {
 					}
 				} else {
 					loggedIn = true;
+					action = "enableControls";
 				}
 			} else {
 				// No connection
@@ -570,6 +579,7 @@ public class Main extends Application {
 
 		// Perform UI changes on the JavaFX thread
 		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				if (action.equals("enableControls")) {
@@ -588,6 +598,16 @@ public class Main extends Application {
 		});
 
 		return loggedIn;
+	}
+
+	/**
+	 * Get the window icon as image
+	 * 
+	 * @return
+	 */
+	public Image getWindowImage() {
+		return new Image(this.getClass().getClassLoader()
+				.getResourceAsStream(PATH + WINDOW_ICON_PATH));
 	}
 
 	/**
@@ -644,11 +664,16 @@ public class Main extends Application {
 	}
 
 	/**
-	 * Get the activities
-	 * 
-	 * @return
+	 * @return the userService
 	 */
-	public ObservableList<Activity> getActivities() {
-		return this.fileService.getActivities();
+	public UserService getUserService() {
+		return userService;
+	}
+
+	/**
+	 * @return the fileService
+	 */
+	public FileService getFileService() {
+		return fileService;
 	}
 }

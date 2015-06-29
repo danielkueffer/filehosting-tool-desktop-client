@@ -87,7 +87,7 @@ public class SetupHomeFolderController extends AnchorPane implements
 		if (homeFolder != null) {
 			this.chooseFolderButton.setText(homeFolder);
 		}
-		
+
 		if (this.propertyService.getProperty(PropertiesKeys.HOME_FOLDER
 				.getValue()) != null) {
 			this.connectButton.setDisable(false);
@@ -106,6 +106,8 @@ public class SetupHomeFolderController extends AnchorPane implements
 
 		if (this.propertyService.getProperty(PropertiesKeys.HOME_FOLDER
 				.getValue()) != null) {
+
+			this.application.setSync(true);
 			this.application.goToSettings(TabKeys.USER);
 		} else {
 			this.homeFolderErrorLabel.setText(this.bundle

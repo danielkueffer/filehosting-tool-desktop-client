@@ -128,6 +128,11 @@ public class SetupAccountController extends AnchorPane implements Initializable 
 		String username = this.usernameField.getText();
 		String password = this.passwordField.getText();
 
+		// Logout if the user is not null
+		if (this.application.getLoggedInUser() != null) {
+			this.application.getUserService().logout();
+		}
+
 		if (!this.userService.login(username, password)) {
 			this.userAccountErrorLabel.setText(this.bundle
 					.getString("setupUserAccountError"));
@@ -156,6 +161,9 @@ public class SetupAccountController extends AnchorPane implements Initializable 
 			} else {
 				this.application.setCurrentLocale(new Locale("en", "EN"));
 			}
+
+			// Set the current user
+			this.application.setLoggedInUser(currentUser);
 		}
 
 		this.application.goToSetupHomeFolder();

@@ -36,6 +36,7 @@ import com.danielkueffer.filehosting.desktop.enums.PropertiesKeys;
 import com.danielkueffer.filehosting.desktop.helper.NetworkHelper;
 import com.danielkueffer.filehosting.desktop.repository.client.FileClient;
 import com.danielkueffer.filehosting.desktop.repository.pojos.Activity;
+import com.danielkueffer.filehosting.desktop.repository.pojos.User;
 import com.danielkueffer.filehosting.desktop.service.FileService;
 import com.danielkueffer.filehosting.desktop.service.PropertyService;
 import com.danielkueffer.filehosting.desktop.service.UserService;
@@ -59,7 +60,7 @@ public class FileServiceImpl implements FileService {
 	private static final String FILE_DELETE_URL = "resource/file/client";
 
 	private static final String CACHE_DIR = "cache";
-	private static final String CACHE_PATH = "cache/file-cache.txt";
+	private static final String CACHE_FILE = "file-cache.txt";
 
 	private FileClient fileClient;
 	private PropertyService propertyService;
@@ -71,7 +72,9 @@ public class FileServiceImpl implements FileService {
 	private String homeFolder;
 	private String fileUrl;
 	private String fileUploadUrl;
+	private String cachePath;
 	private JsonArray jsonFileArray;
+	private User user;
 
 	public FileServiceImpl(FileClient fileClient,
 			PropertyService propertyService, UserService userService) {
@@ -105,6 +108,23 @@ public class FileServiceImpl implements FileService {
 	public void startSynchronization() {
 		this.filePaths = new ArrayList<Path>();
 		this.deletedOnDiskPaths = new ArrayList<String>();
+
+		User user = this.userService.getUser();
+
+		// Set the initial user
+		if (this.user == null) {
+			this.user = user;
+		}
+
+		// Check if the user has changed and flush the activity list
+		if (this.user.getId() != user.getId()) {
+			this.activityList = new ArrayList<Activity>();
+		}
+
+		this.user = user;
+
+		this.cachePath = CACHE_DIR + "/" + user.getUsername() + "-"
+				+ CACHE_FILE;
 
 		// URL to the file resource
 		this.fileUrl = this.propertyService
@@ -218,7 +238,7 @@ public class FileServiceImpl implements FileService {
 	 */
 	private void deleteFilesOnServer() {
 
-		File cacheFile = new File(CACHE_PATH);
+		File cacheFile = new File(this.cachePath);
 
 		String fileDeleteUrl = this.propertyService
 				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
@@ -229,7 +249,7 @@ public class FileServiceImpl implements FileService {
 			String line;
 
 			try {
-				InputStream is = new FileInputStream(CACHE_PATH);
+				InputStream is = new FileInputStream(this.cachePath);
 				InputStreamReader isr = new InputStreamReader(is,
 						Charset.forName("UTF-8"));
 				BufferedReader br = new BufferedReader(isr);
@@ -285,7 +305,7 @@ public class FileServiceImpl implements FileService {
 
 		try {
 			PrintWriter writer = new PrintWriter(new BufferedWriter(
-					new FileWriter(CACHE_PATH)));
+					new FileWriter(this.cachePath)));
 
 			FileSystem fs = FileSystems.getDefault();
 
@@ -399,7 +419,7 @@ public class FileServiceImpl implements FileService {
 
 		try {
 			PrintWriter writer = new PrintWriter(new BufferedWriter(
-					new FileWriter(CACHE_PATH, true)));
+					new FileWriter(this.cachePath, true)));
 
 			this.walkDir(this.homeFolder, folderAddUrl, writer);
 
