@@ -85,7 +85,8 @@ public class FileClientImpl implements FileClient {
 				.request(MediaType.APPLICATION_JSON)
 				.header("auth_token", authToken)
 				.post(Entity.entity(form,
-						MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+						MediaType.APPLICATION_FORM_URLENCODED_TYPE
+								+ "; charset=UTF-8"));
 
 		return res.readEntity(String.class);
 	}
