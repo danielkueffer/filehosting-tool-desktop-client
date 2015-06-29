@@ -30,8 +30,8 @@
           <children>
             <VBox minWidth="325.0" prefHeight="80.0" prefWidth="346.0">
               <children>
-                <TextArea fx:id="connectionLabel" disable="false" editable="false" focusTraversable="true" prefWidth="200.0" styleClass="plain-text-area" text="" wrapText="true" />
-                <TextArea fx:id="localFolderLabel" editable="false" focusTraversable="false" prefWidth="200.0" styleClass="plain-text-area" text="" wrapText="true" />
+                <TextArea fx:id="connectionLabel" disable="true" editable="false" focusTraversable="true" opacity="1.0" prefWidth="200.0" styleClass="plain-text-area" text="" wrapText="true" />
+                <TextArea fx:id="localFolderLabel" disable="true" editable="false" focusTraversable="true" opacity="1.0" prefWidth="200.0" styleClass="plain-text-area" text="" wrapText="true" />
               </children>
               <HBox.margin>
                 <Insets top="10.0" fx:id="x3" />

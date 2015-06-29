@@ -11,3 +11,12 @@
 	-fx-background-color: #fff;
 	-fx-padding: 0;
 }
+
+.plain-text-area:disabled {
+	-fx-text-fill: #292929;
+	-fx-opacity: 1.0;
+}
+
+.plain-text-area .scroll-pane:disabled {
+	-fx-opacity: 1.0;
+}
