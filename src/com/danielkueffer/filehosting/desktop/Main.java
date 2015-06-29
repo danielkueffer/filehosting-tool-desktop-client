@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
@@ -64,6 +65,9 @@ public class Main extends Application {
 	/* Path */
 	public static final String PATH = "com/danielkueffer/filehosting/desktop/";
 
+	/* Configuration directory */
+	public static final String CONFIG_DIR = ".filehosting-tool";
+
 	/* Window Icon Path */
 	public static final String WINDOW_ICON_PATH = "resources/images/folder_sync.png";
 
@@ -116,15 +120,18 @@ public class Main extends Application {
 	 */
 	@Override
 	public void start(Stage primaryStage) {
+
+		String homeConfigDir = this.getHomeConfigDir();
+
 		this.primaryStage = primaryStage;
 
 		this.userClient = new UserClientImpl();
 		this.fileClient = new FileClientImpl();
 
-		this.propertyService = new PropertyServiceImpl();
+		this.propertyService = new PropertyServiceImpl(homeConfigDir);
 		this.userService = new UserServiceImpl(userClient, propertyService);
 		this.fileService = new FileServiceImpl(fileClient, propertyService,
-				userService);
+				userService, homeConfigDir);
 
 		// Set the propertyService in the network helper
 		NetworkHelper.setPropertyService(this.propertyService);
@@ -608,6 +615,24 @@ public class Main extends Application {
 	public Image getWindowImage() {
 		return new Image(this.getClass().getClassLoader()
 				.getResourceAsStream(PATH + WINDOW_ICON_PATH));
+	}
+
+	/**
+	 * Get the home configuration directory and create it in user.home if it's
+	 * not existing
+	 * 
+	 * @return
+	 */
+	private String getHomeConfigDir() {
+		String homeConfig = System.getProperty("user.home") + "/" + CONFIG_DIR;
+
+		// Create the configuration directory in user.home
+		File dir = new File(homeConfig);
+		if (!dir.exists()) {
+			dir.mkdirs();
+		}
+
+		return homeConfig;
 	}
 
 	/**

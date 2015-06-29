@@ -19,11 +19,15 @@ import com.danielkueffer.filehosting.desktop.service.PropertyService;
 public class PropertyServiceImpl implements PropertyService {
 
 	private static final String CONFIG_DIR = "config";
-	private static final String CONFIG_PATH = "config/config.properties";
 
 	private Properties props;
+	private String appConfigDir;
+	private String configPath;
 
-	public PropertyServiceImpl() {
+	public PropertyServiceImpl(String appConfigDir) {
+		this.appConfigDir = appConfigDir;
+		this.configPath = this.appConfigDir + "/config/config.properties";
+
 		this.props = new Properties();
 		this.createFileIfNotExists();
 	}
@@ -37,7 +41,7 @@ public class PropertyServiceImpl implements PropertyService {
 		String value = "";
 
 		try {
-			input = new FileInputStream(CONFIG_PATH);
+			input = new FileInputStream(this.configPath);
 			this.props.load(input);
 
 			value = this.props.getProperty(key);
@@ -64,7 +68,7 @@ public class PropertyServiceImpl implements PropertyService {
 		OutputStream output = null;
 
 		try {
-			output = new FileOutputStream(CONFIG_PATH);
+			output = new FileOutputStream(this.configPath);
 
 			// Set the property
 			this.props.setProperty(key, value);
@@ -91,13 +95,13 @@ public class PropertyServiceImpl implements PropertyService {
 	private void createFileIfNotExists() {
 
 		// Check for config directory
-		File dir = new File(CONFIG_DIR);
+		File dir = new File(this.appConfigDir + "/" + CONFIG_DIR);
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}
 
 		// Check for config file
-		File configFile = new File(CONFIG_PATH);
+		File configFile = new File(this.configPath);
 		if (!configFile.exists()) {
 			try {
 				configFile.createNewFile();

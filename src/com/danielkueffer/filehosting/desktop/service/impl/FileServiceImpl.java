@@ -66,6 +66,8 @@ public class FileServiceImpl implements FileService {
 	private PropertyService propertyService;
 	private UserService userService;
 
+	private String appConfigPath;
+
 	private List<Path> filePaths;
 	private List<String> deletedOnDiskPaths;
 	private List<Activity> activityList;
@@ -77,11 +79,14 @@ public class FileServiceImpl implements FileService {
 	private User user;
 
 	public FileServiceImpl(FileClient fileClient,
-			PropertyService propertyService, UserService userService) {
+			PropertyService propertyService, UserService userService,
+			String appConfigPath) {
 		this.fileClient = fileClient;
 		this.propertyService = propertyService;
 		this.userService = userService;
 		this.activityList = new ArrayList<Activity>();
+
+		this.appConfigPath = appConfigPath;
 	}
 
 	/**
@@ -123,8 +128,8 @@ public class FileServiceImpl implements FileService {
 
 		this.user = user;
 
-		this.cachePath = CACHE_DIR + "/" + user.getUsername() + "-"
-				+ CACHE_FILE;
+		this.cachePath = this.appConfigPath + "/" + CACHE_DIR + "/"
+				+ user.getUsername() + "-" + CACHE_FILE;
 
 		// URL to the file resource
 		this.fileUrl = this.propertyService
@@ -568,7 +573,7 @@ public class FileServiceImpl implements FileService {
 	 */
 	private void createCacheDir() {
 		// Check for the cache directory
-		File dir = new File(CACHE_DIR);
+		File dir = new File(this.appConfigPath + "/" + CACHE_DIR);
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}
