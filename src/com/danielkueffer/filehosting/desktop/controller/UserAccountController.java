@@ -120,21 +120,31 @@ public class UserAccountController extends Parent implements Initializable {
 	public void setDiskProgress() {
 		User user = this.application.getLoggedInUser();
 
-		// Disk quota in GB
-		long diskQuota = user.getDiskQuota();
-		double diskQuotaBytes = diskQuota * 1024 * 1024 * 1024;
+		double diskQuotaBytes = user.getDiskQuota();
 
 		// Used disk space in bytes
 		double usedDiskSpace = user.getUsedDiskSpace();
 
-		double percent = (usedDiskSpace / diskQuotaBytes) * 100;
+		if (diskQuotaBytes > 0) {
+			double percent = (usedDiskSpace / diskQuotaBytes) * 100;
 
-		// Set progress bar value
-		this.diskSpaceBar.progressProperty().set(percent / 100);
+			// Set progress bar value
+			this.diskSpaceBar.progressProperty().set(percent / 100);
+			
+			long diskQuotaGb = user.getDiskQuota() / 1024 / 1024 / 1024;
 
-		// Set the labels
-		this.quotaLabel.setText(this.bundle.getString("settingsQuota") + " "
-				+ user.getDiskQuota() + " GB");
+			// Set the quota label
+			this.quotaLabel.setText(this.bundle.getString("settingsQuota")
+					+ " " + diskQuotaGb + " GB");
+		} else {
+
+			// Unlimited disk space
+			this.diskSpaceBar.progressProperty().set(0);
+
+			// Set the quota label
+			this.quotaLabel.setText(this.bundle.getString("settingsQuota")
+					+ " " + this.bundle.getString("settingsQuotaUnlimited"));
+		}
 
 		String usedStr = 0 + " KB";
 
