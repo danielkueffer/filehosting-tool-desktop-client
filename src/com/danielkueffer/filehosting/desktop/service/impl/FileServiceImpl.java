@@ -16,6 +16,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -538,7 +539,7 @@ public class FileServiceImpl implements FileService {
 					+ filePath, this.userService.getAuthToken());
 
 			// Write the file
-			Files.copy(is, systemPath);
+			Files.copy(is, systemPath, StandardCopyOption.REPLACE_EXISTING);
 
 			is.close();
 		} catch (IOException e) {
