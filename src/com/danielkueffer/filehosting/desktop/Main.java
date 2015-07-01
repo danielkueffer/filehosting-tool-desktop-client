@@ -277,7 +277,8 @@ public class Main extends Application {
 				break;
 			}
 
-			// Start the connection and sync thread if not started
+			// Start the connection and containing synchronization thread if not
+			// started
 			if (!this.connectionThread.isAlive()) {
 				this.connectionThread.start();
 			}
@@ -465,13 +466,6 @@ public class Main extends Application {
 	}
 
 	/**
-	 * Start synchronization
-	 */
-	public void startSync() {
-		this.fileService.startSynchronization();
-	}
-
-	/**
 	 * Login to the rest service
 	 * 
 	 * @param username
@@ -497,11 +491,19 @@ public class Main extends Application {
 
 				// User is logged in
 				if (loggedIn && isSync) {
+					if (fileService.isSynchronizationComplete()) {
 
-					// start the synchronization
-					startSync();
+						// Start the synchronization in a new thread to prevent
+						// blocking the GUI
+						new Thread(new Runnable() {
+							@Override
+							public void run() {
+								fileService.startSynchronization();
+							}
+						}).start();
 
-					started = true;
+						started = true;
+					}
 				} else {
 					started = false;
 				}
@@ -527,7 +529,7 @@ public class Main extends Application {
 					}
 				});
 
-				Thread.sleep(1000);
+				Thread.sleep(1500);
 			}
 		}
 	};

@@ -80,6 +80,7 @@ public class FileServiceImpl implements FileService {
 	private JsonArray jsonFileArray;
 	private User user;
 	private int maxUploadSize;
+	private boolean synchronizationComplete = true;
 
 	public FileServiceImpl(FileClient fileClient,
 			PropertyService propertyService, UserService userService,
@@ -114,6 +115,8 @@ public class FileServiceImpl implements FileService {
 	 */
 	@Override
 	public void startSynchronization() {
+		this.synchronizationComplete = false;
+
 		this.filePaths = new ArrayList<Path>();
 		this.deletedOnDiskPaths = new ArrayList<String>();
 
@@ -176,6 +179,8 @@ public class FileServiceImpl implements FileService {
 
 		// Step 4 - check for new files in the home folder
 		this.lookupFilesInHomeFolder();
+
+		this.synchronizationComplete = true;
 	}
 
 	/**
@@ -608,5 +613,13 @@ public class FileServiceImpl implements FileService {
 	@Override
 	public ObservableList<Activity> getActivities() {
 		return FXCollections.observableArrayList(this.activityList);
+	}
+
+	/**
+	 * @return the synchronizationComplete
+	 */
+	@Override
+	public boolean isSynchronizationComplete() {
+		return synchronizationComplete;
 	}
 }

@@ -14,4 +14,6 @@ public interface FileService {
 	void startSynchronization();
 
 	ObservableList<Activity> getActivities();
+
+	boolean isSynchronizationComplete();
 }
