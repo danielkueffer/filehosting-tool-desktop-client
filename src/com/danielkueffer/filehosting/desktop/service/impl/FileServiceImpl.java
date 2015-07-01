@@ -79,6 +79,7 @@ public class FileServiceImpl implements FileService {
 	private String cachePath;
 	private JsonArray jsonFileArray;
 	private User user;
+	private int maxUploadSize;
 
 	public FileServiceImpl(FileClient fileClient,
 			PropertyService propertyService, UserService userService,
@@ -157,8 +158,18 @@ public class FileServiceImpl implements FileService {
 		String userFiles = this.fileClient.getFilesByUser(fileUrl,
 				this.userService.getAuthToken());
 
-		JsonReader reader = Json.createReader(new StringReader(userFiles));
-		this.jsonFileArray = reader.readObject().getJsonArray("files");
+		JsonReader fileReader = Json.createReader(new StringReader(userFiles));
+
+		// Get the file array
+		this.jsonFileArray = fileReader.readObject().getJsonArray("files");
+
+		// Get the configuration
+		JsonReader confReader = Json.createReader(new StringReader(userFiles));
+		JsonArray jsonConfArray = confReader.readObject().getJsonArray(
+				"configuration");
+
+		this.maxUploadSize = jsonConfArray.getJsonObject(0).getInt(
+				"maxUploadSize");
 
 		// Step 3 - download files to the client
 		this.lookupFilesOnServer();
@@ -458,32 +469,38 @@ public class FileServiceImpl implements FileService {
 		for (File f : list) {
 			if (!f.getName().startsWith("~")) {
 				if (!f.isDirectory()) {
-					// Check if the file is existing on the server
-					if (!this.filePaths.contains(f.getAbsoluteFile().toPath())) {
-						String parentPath = NetworkHelper.getRelativePath(
-								f.getParent(), this.homeFolder);
 
-						// Get the parent id
-						int parent = this.getParentIdFromPath(parentPath);
+					// Check if the file is smaller than maxUploadSize
+					if (f.length() < this.maxUploadSize) {
 
-						// Upload the file
-						this.fileClient.uploadFile(fileUploadUrl, f,
-								f.getName(), parent,
-								this.userService.getAuthToken());
+						// Check if the file is existing on the server
+						if (!this.filePaths.contains(f.getAbsoluteFile()
+								.toPath())) {
+							String parentPath = NetworkHelper.getRelativePath(
+									f.getParent(), this.homeFolder);
 
-						// Write the path to the cache file
-						writer.println(f.getAbsolutePath());
+							// Get the parent id
+							int parent = this.getParentIdFromPath(parentPath);
 
-						// Create activity
-						Activity activity = new Activity();
-						activity.setDate(new Date());
-						activity.setAction("upload");
-						activity.setFile(f.getName());
-						activity.setHomeFolder(this.homeFolder);
+							// Upload the file
+							this.fileClient.uploadFile(fileUploadUrl, f,
+									f.getName(), parent,
+									this.userService.getAuthToken());
 
-						this.activityList.add(activity);
+							// Write the path to the cache file
+							writer.println(f.getAbsolutePath());
 
-						_log.info("File uploaded: " + f.getAbsoluteFile());
+							// Create activity
+							Activity activity = new Activity();
+							activity.setDate(new Date());
+							activity.setAction("upload");
+							activity.setFile(f.getName());
+							activity.setHomeFolder(this.homeFolder);
+
+							this.activityList.add(activity);
+
+							_log.info("File uploaded: " + f.getAbsoluteFile());
+						}
 					}
 				} else {
 					// Check if the directory is existing on the server
