@@ -114,17 +114,15 @@ public class FileServiceImpl implements FileService {
 	 * disk - write the files to file-cache.txt file in desktop application
 	 */
 	@Override
-	public void startSynchronization() {
+	public void startSynchronization(User loggedInUser) {
 		this.synchronizationComplete = false;
 
 		this.filePaths = new ArrayList<Path>();
 		this.deletedOnDiskPaths = new ArrayList<String>();
 
-		User user = this.userService.getUser();
-
 		// Set the initial user
 		if (this.user == null) {
-			this.user = user;
+			this.user = loggedInUser;
 		}
 
 		// Check if the user has changed and flush the activity list
@@ -132,7 +130,7 @@ public class FileServiceImpl implements FileService {
 			this.activityList = new ArrayList<Activity>();
 		}
 
-		this.user = user;
+		this.user = loggedInUser;
 
 		this.cachePath = this.appConfigPath + "/" + CACHE_DIR + "/"
 				+ user.getUsername() + "-" + CACHE_FILE;
@@ -473,12 +471,50 @@ public class FileServiceImpl implements FileService {
 
 		for (File f : list) {
 			if (!f.getName().startsWith("~")) {
-				if (!f.isDirectory()) {
 
-					// Check if the file is smaller than maxUploadSize
-					if (f.length() < this.maxUploadSize) {
+				// Check if the quota of the user is full
+				if ((this.user.getUsedDiskSpace() + f.length()) < user
+						.getDiskQuota()) {
 
-						// Check if the file is existing on the server
+					if (!f.isDirectory()) {
+
+						// Check if the file is smaller than maxUploadSize
+						if (f.length() < this.maxUploadSize) {
+
+							// Check if the file is existing on the server
+							if (!this.filePaths.contains(f.getAbsoluteFile()
+									.toPath())) {
+								String parentPath = NetworkHelper
+										.getRelativePath(f.getParent(),
+												this.homeFolder);
+
+								// Get the parent id
+								int parent = this
+										.getParentIdFromPath(parentPath);
+
+								// Upload the file
+								this.fileClient.uploadFile(fileUploadUrl, f,
+										f.getName(), parent,
+										this.userService.getAuthToken());
+
+								// Write the path to the cache file
+								writer.println(f.getAbsolutePath());
+
+								// Create activity
+								Activity activity = new Activity();
+								activity.setDate(new Date());
+								activity.setAction("upload");
+								activity.setFile(f.getName());
+								activity.setHomeFolder(this.homeFolder);
+
+								this.activityList.add(activity);
+
+								_log.info("File uploaded: "
+										+ f.getAbsoluteFile());
+							}
+						}
+					} else {
+						// Check if the directory is existing on the server
 						if (!this.filePaths.contains(f.getAbsoluteFile()
 								.toPath())) {
 							String parentPath = NetworkHelper.getRelativePath(
@@ -487,8 +523,8 @@ public class FileServiceImpl implements FileService {
 							// Get the parent id
 							int parent = this.getParentIdFromPath(parentPath);
 
-							// Upload the file
-							this.fileClient.uploadFile(fileUploadUrl, f,
+							// Create the directory
+							this.fileClient.createFolder(folderAddUrl,
 									f.getName(), parent,
 									this.userService.getAuthToken());
 
@@ -504,39 +540,12 @@ public class FileServiceImpl implements FileService {
 
 							this.activityList.add(activity);
 
-							_log.info("File uploaded: " + f.getAbsoluteFile());
+							_log.info("Folder uploaded: " + f.getAbsolutePath());
 						}
+
+						// Directory, walk further
+						walkDir(f.getAbsolutePath(), folderAddUrl, writer);
 					}
-				} else {
-					// Check if the directory is existing on the server
-					if (!this.filePaths.contains(f.getAbsoluteFile().toPath())) {
-						String parentPath = NetworkHelper.getRelativePath(
-								f.getParent(), this.homeFolder);
-
-						// Get the parent id
-						int parent = this.getParentIdFromPath(parentPath);
-
-						// Create the directory
-						this.fileClient.createFolder(folderAddUrl, f.getName(),
-								parent, this.userService.getAuthToken());
-
-						// Write the path to the cache file
-						writer.println(f.getAbsolutePath());
-
-						// Create activity
-						Activity activity = new Activity();
-						activity.setDate(new Date());
-						activity.setAction("upload");
-						activity.setFile(f.getName());
-						activity.setHomeFolder(this.homeFolder);
-
-						this.activityList.add(activity);
-
-						_log.info("Folder uploaded: " + f.getAbsolutePath());
-					}
-
-					// Directory, walk further
-					walkDir(f.getAbsolutePath(), folderAddUrl, writer);
 				}
 			}
 		}

@@ -41,7 +41,8 @@ public class User {
 	}
 
 	/**
-	 * @param username the username to set
+	 * @param username
+	 *            the username to set
 	 */
 	public void setUsername(String username) {
 		this.username = username;
@@ -55,7 +56,8 @@ public class User {
 	}
 
 	/**
-	 * @param displayName the displayName to set
+	 * @param displayName
+	 *            the displayName to set
 	 */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
@@ -84,7 +86,8 @@ public class User {
 	}
 
 	/**
-	 * @param language the language to set
+	 * @param language
+	 *            the language to set
 	 */
 	public void setLanguage(String language) {
 		this.language = language;
@@ -120,7 +123,9 @@ public class User {
 		this.usedDiskSpace = usedDiskSpace;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -141,7 +146,9 @@ public class User {
 		return result;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -182,7 +189,9 @@ public class User {
 		return true;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

@@ -87,7 +87,8 @@ public class UserServiceImpl implements UserService {
 			String email = jObj.getString("email");
 			String language = jObj.getString("language");
 			long diskQuota = Long.valueOf(jObj.get("diskQuota").toString());
-			long usedDiskSpace = jObj.getInt("usedDiskSpace");
+			long usedDiskSpace = Long.valueOf(jObj.get("usedDiskSpace")
+					.toString());
 
 			// Create a new user
 			user = new User();

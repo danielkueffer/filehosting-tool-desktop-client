@@ -498,7 +498,18 @@ public class Main extends Application {
 						new Thread(new Runnable() {
 							@Override
 							public void run() {
-								fileService.startSynchronization();
+								// Start the synchronization
+								fileService.startSynchronization(getLoggedInUser());
+
+								// Set the current user info
+								User user = userService.getUser();
+
+								if (user != null) {
+									getLoggedInUser().setDiskQuota(
+											user.getDiskQuota());
+									getLoggedInUser().setUsedDiskSpace(
+											user.getUsedDiskSpace());
+								}
 							}
 						}).start();
 

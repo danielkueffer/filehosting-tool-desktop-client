@@ -123,8 +123,8 @@ public class UserAccountController extends Parent implements Initializable {
 		double diskQuotaBytes = user.getDiskQuota();
 
 		// Used disk space in bytes
-		double usedDiskSpace = user.getUsedDiskSpace();
-
+		long usedDiskSpace = user.getUsedDiskSpace();
+		
 		if (diskQuotaBytes > 0) {
 			double percent = (usedDiskSpace / diskQuotaBytes) * 100;
 
