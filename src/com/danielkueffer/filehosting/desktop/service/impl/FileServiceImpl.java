@@ -193,6 +193,8 @@ public class FileServiceImpl implements FileService {
 
 		String deletedFiles = this.fileClient.getDeletedFilesByUser(
 				deletedFilesUrl, this.userService.getAuthToken());
+		
+		System.out.println("Deleted Files" + deletedFiles);
 
 		JsonReader reader = Json.createReader(new StringReader(deletedFiles));
 		JsonArray deletedArray = reader.readArray();
@@ -216,6 +218,7 @@ public class FileServiceImpl implements FileService {
 
 				// Delete from disk
 				if (file.exists()) {
+
 					// Directory
 					if (file.isDirectory()) {
 						try {
@@ -225,11 +228,15 @@ public class FileServiceImpl implements FileService {
 							e.printStackTrace();
 						}
 					} else {
-						// File
-						if (file.lastModified() == lastModified.getTime()) {
-							file.delete();
 
-							_log.info("File deleted: " + filePath);
+						// File
+						if (this.getTimestampDroppedMillis(file.lastModified()) == this
+								.getTimestampDroppedMillis(lastModified
+										.getTime())) {
+
+							boolean fDel = file.delete();
+
+							_log.info("File deleted: " + filePath + ": " + fDel);
 						}
 					}
 
@@ -398,8 +405,10 @@ public class FileServiceImpl implements FileService {
 							this.activityList.add(activity);
 
 							// File on disk is older
-						} else if (file.lastModified() < lastModifiedStamp
-								.getTime()) {
+						} else if (this.getTimestampDroppedMillis(file
+								.lastModified()) < this
+								.getTimestampDroppedMillis(lastModifiedStamp
+										.getTime())) {
 
 							// Download the file
 							this.downloadFile(path, filePath);
@@ -516,6 +525,7 @@ public class FileServiceImpl implements FileService {
 							}
 						}
 					} else {
+						// TODO Check if the file is in the deleted_files table
 						// Check if the directory is existing on the server
 						if (!this.filePaths.contains(f.getAbsoluteFile()
 								.toPath())) {

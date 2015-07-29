@@ -104,6 +104,7 @@ public class Main extends Application {
 
 	private ResourceBundle bundle;
 	private Thread connectionThread;
+	private Thread syncThread;
 
 	private UserAccountController userAccountController;
 	private SettingsController settingsController;
@@ -491,30 +492,35 @@ public class Main extends Application {
 
 				// User is logged in
 				if (loggedIn && isSync) {
-					if (fileService.isSynchronizationComplete()) {
 
-						// Start the synchronization in a new thread to prevent
-						// blocking the GUI
-						new Thread(new Runnable() {
-							@Override
-							public void run() {
-								// Start the synchronization
-								fileService.startSynchronization(getLoggedInUser());
-
-								// Set the current user info
-								User user = userService.getUser();
-
-								if (user != null) {
-									getLoggedInUser().setDiskQuota(
-											user.getDiskQuota());
-									getLoggedInUser().setUsedDiskSpace(
-											user.getUsedDiskSpace());
-								}
-							}
-						}).start();
-
-						started = true;
+					// Check if the previous thread is still running
+					if (syncThread != null && syncThread.isAlive()) {
+						continue;
 					}
+
+					// Start the synchronization in a new thread to prevent
+					// blocking the GUI
+					syncThread = new Thread(new Runnable() {
+						@Override
+						public void run() {
+							// Start the synchronization
+							fileService.startSynchronization(getLoggedInUser());
+
+							// Set the current user info
+							User user = userService.getUser();
+
+							if (user != null) {
+								getLoggedInUser().setDiskQuota(
+										user.getDiskQuota());
+								getLoggedInUser().setUsedDiskSpace(
+										user.getUsedDiskSpace());
+							}
+						}
+					});
+
+					syncThread.start();
+
+					started = true;
 				} else {
 					started = false;
 				}
