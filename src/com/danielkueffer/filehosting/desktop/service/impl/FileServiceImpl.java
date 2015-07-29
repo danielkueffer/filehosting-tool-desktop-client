@@ -193,8 +193,6 @@ public class FileServiceImpl implements FileService {
 
 		String deletedFiles = this.fileClient.getDeletedFilesByUser(
 				deletedFilesUrl, this.userService.getAuthToken());
-		
-		System.out.println("Deleted Files" + deletedFiles);
 
 		JsonReader reader = Json.createReader(new StringReader(deletedFiles));
 		JsonArray deletedArray = reader.readArray();
