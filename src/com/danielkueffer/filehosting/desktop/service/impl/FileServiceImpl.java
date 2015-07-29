@@ -377,7 +377,9 @@ public class FileServiceImpl implements FileService {
 					if (!type.equals("folder")) {
 
 						// File on disk is newer
-						if (file.lastModified() > lastModifiedStamp.getTime()) {
+						if (this.getTimestampDroppedMillis(file.lastModified()) > this
+								.getTimestampDroppedMillis(lastModifiedStamp
+										.getTime())) {
 
 							// Upload the file
 							this.fileClient.uploadFile(fileUploadUrl, file,
@@ -614,6 +616,16 @@ public class FileServiceImpl implements FileService {
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}
+	}
+
+	/**
+	 * Return a TimeStamp without milliseconds
+	 * 
+	 * @param timestamp
+	 * @return
+	 */
+	private long getTimestampDroppedMillis(long timestamp) {
+		return 1000 * (timestamp / 1000);
 	}
 
 	/**

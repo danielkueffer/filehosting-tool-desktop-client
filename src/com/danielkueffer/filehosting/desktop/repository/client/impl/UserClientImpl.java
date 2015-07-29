@@ -64,6 +64,7 @@ public class UserClientImpl implements UserClient {
 	 */
 	@Override
 	public String getUserInfo(String url, String authToken) {
+		
 		ResteasyClient client = new ResteasyClientBuilder().httpEngine(
 				NetworkHelper.getEngine()).build();
 
@@ -88,6 +89,7 @@ public class UserClientImpl implements UserClient {
 
 			return res.readEntity(String.class);
 		} catch (ProcessingException pe) {
+			pe.printStackTrace();
 			return null;
 		}
 	}
