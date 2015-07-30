@@ -69,6 +69,7 @@ public class FileServiceImpl implements FileService {
 	private UserService userService;
 
 	private String appConfigPath;
+	private String fullDeletedFilesUrl;
 
 	private List<Path> filePaths;
 	private List<String> deletedOnDiskPaths;
@@ -91,6 +92,10 @@ public class FileServiceImpl implements FileService {
 		this.activityList = new ArrayList<Activity>();
 
 		this.appConfigPath = appConfigPath;
+
+		this.fullDeletedFilesUrl = this.propertyService
+				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
+				+ DELETED_FILES_URL;
 	}
 
 	/**
@@ -187,15 +192,8 @@ public class FileServiceImpl implements FileService {
 	 */
 	private void deleteFilesOnDisk() {
 
-		String deletedFilesUrl = this.propertyService
-				.getProperty(PropertiesKeys.SERVER_ADDRESS.getValue())
-				+ DELETED_FILES_URL;
-
-		String deletedFiles = this.fileClient.getDeletedFilesByUser(
-				deletedFilesUrl, this.userService.getAuthToken());
-
-		JsonReader reader = Json.createReader(new StringReader(deletedFiles));
-		JsonArray deletedArray = reader.readArray();
+		// Get the deleted files JsonArray
+		JsonArray deletedArray = this.getDeletedFilesArray();
 
 		FileSystem fs = FileSystems.getDefault();
 
@@ -254,7 +252,7 @@ public class FileServiceImpl implements FileService {
 			}
 		}
 
-		this.fileClient.updateDeletedFiles(deletedFilesUrl,
+		this.fileClient.updateDeletedFiles(this.fullDeletedFilesUrl,
 				this.userService.getAuthToken());
 	}
 
@@ -485,6 +483,11 @@ public class FileServiceImpl implements FileService {
 				if ((this.user.getUsedDiskSpace() + f.length()) < user
 						.getDiskQuota()) {
 
+					// Skip the file if its in the files deleted table
+					if (this.isFileInDeletedArray(f)) {
+						continue;
+					}
+
 					if (!f.isDirectory()) {
 
 						// Check if the file is smaller than maxUploadSize
@@ -523,7 +526,6 @@ public class FileServiceImpl implements FileService {
 							}
 						}
 					} else {
-						// TODO Check if the file is in the deleted_files table
 						// Check if the directory is existing on the server
 						if (!this.filePaths.contains(f.getAbsoluteFile()
 								.toPath())) {
@@ -616,6 +618,48 @@ public class FileServiceImpl implements FileService {
 	}
 
 	/**
+	 * Check if a file is in the files deleted database and not yet deleted on
+	 * disk
+	 * 
+	 * @param file
+	 * @return
+	 */
+	private boolean isFileInDeletedArray(File file) {
+		FileSystem fs = FileSystems.getDefault();
+
+		// Check if the file is marked as deleted in the database
+		JsonArray deletedArray = this.getDeletedFilesArray();
+
+		for (int i = 0; i < deletedArray.size(); i++) {
+
+			JsonObject jObj = deletedArray.getJsonObject(i);
+			String filePath = jObj.getString("path");
+			Timestamp lastModified = Timestamp.valueOf(jObj
+					.getString("lastModified"));
+			int clientDeleted = jObj.getInt("clientDeleted");
+
+			// Check if it's not been deleted before
+			if (clientDeleted == 0) {
+				Path deletedPath = fs.getPath(this.homeFolder)
+						.resolve(filePath);
+
+				long deletedStamp = this.getTimestampDroppedMillis(lastModified
+						.getTime());
+				long fileStamp = this.getTimestampDroppedMillis(file
+						.lastModified());
+
+				// The file is in the deleted table and not yet deleted on disk
+				if (file.getAbsoluteFile().toPath().equals(deletedPath)
+						&& deletedStamp == fileStamp) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Create the cache directory if it's not existing
 	 */
 	private void createCacheDir() {
@@ -634,6 +678,20 @@ public class FileServiceImpl implements FileService {
 	 */
 	private long getTimestampDroppedMillis(long timestamp) {
 		return 1000 * (timestamp / 1000);
+	}
+
+	/**
+	 * Get the deleted files array
+	 * 
+	 * @return
+	 */
+	private JsonArray getDeletedFilesArray() {
+		String deletedFiles = this.fileClient.getDeletedFilesByUser(
+				this.fullDeletedFilesUrl, this.userService.getAuthToken());
+
+		JsonReader reader = Json.createReader(new StringReader(deletedFiles));
+
+		return reader.readArray();
 	}
 
 	/**
